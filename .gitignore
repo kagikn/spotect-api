@@ -1,0 +1,12 @@
+t.DS_Store
+.AppleDouble
+.LSOverride
+
+.idea/
+.vscode/
+/coverage/
+/vendor/
+/logs/*
+!/logs/README.md
+.phpunit.result.cache
+.env

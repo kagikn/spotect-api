@@ -6,6 +6,7 @@ namespace App\Infrastructure\Persistence\SpotifyApi;
 
 use _PHPStan_3e014c27f\Nette\Neon\Exception;
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
+use App\Domain\Entities\SpotifyApi\RestrictionsObject;
 use App\Domain\Entities\SpotifyApi\SearchResponseParser;
 use App\Domain\Entities\SpotifyApi\TrackObjectFullEntity;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
@@ -57,6 +58,9 @@ class TrackApiRepository implements TrackRepository
         $albumObjSimplified = SearchResponseParser::parseAlbumObjectSimplified($searchResultJson['album']);
         $artistObjSimplifiedArray =
             SearchResponseParser::parseArtistObjectSimplifiedArray($searchResultJson['artists']);
+        $restrictionObj = isset($searchResultJson['restrictions'])
+            ? new RestrictionsObject($searchResultJson['restrictions']['reason'])
+            : null;
         return new TrackObjectFullEntity(
             id: $searchResultJson['id'],
             album: $albumObjSimplified,
@@ -76,7 +80,7 @@ class TrackApiRepository implements TrackRepository
             isPlayable: $searchResultJson['is_playable'] ?? false,
             linkedFrom: $searchResultJson['linked_from'] ?? null,
             previewUrl: $searchResultJson['preview_url'] ?? null,
-            restrictions: $searchResultJson['restrictions'] ?? null,
+            restrictions: $restrictionObj ?? null,
         );
     }
 }

@@ -98,6 +98,9 @@ class SearchResponseParser
         foreach ($items as $key => $item) {
             $albumObjSimplified = self::parseAlbumObjectSimplified($item['album']);
             $artistObjSimplifiedArray = self::parseArtistObjectSimplifiedArray($item['artists']);
+            $restrictionObj = isset($item['restrictions'])
+                ? new RestrictionsObject($item['restrictions']['reason'])
+                : null;
             $array_map[$key] = new TrackObjectFullEntity(
                 id: $item['id'],
                 album: $albumObjSimplified,
@@ -117,7 +120,7 @@ class SearchResponseParser
                 isPlayable: $item['is_playable'] ?? false,
                 linkedFrom: $item['linked_from'] ?? null,
                 previewUrl: $item['preview_url'] ?? null,
-                restrictions: $item['restrictions'] ?? null,
+                restrictions: $restrictionObj ?? null,
             );
         }
         return $array_map;

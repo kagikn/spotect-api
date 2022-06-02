@@ -5,25 +5,25 @@ namespace App\Domain\Entities\SpotifyApi;
 class TrackObjectFullEntity extends TrackObjectSimplified
 {
     public function __construct(
-        string             $id,
-        public             readonly AlbumObjectSimplified $album,
-        array              $artists,
-        int                $discNumber,
-        int                $durationMs,
-        bool               $explicit,
-        public             readonly array $externalIds,
-        array              $externalUrls,
-        string             $href,
-        string             $name,
-        public             readonly int $popularity,
-        int                $trackNumber,
-        string             $uri,
-        array              $availableMarkets = null,
-        public             readonly bool $isLocal = false,
-        bool               $isPlayable = false,
-        TrackLinkObject    $linkedFrom = null,
-        string             $previewUrl = null,
-        RestrictionsObject $restrictions = null,
+        string                                $id,
+        public readonly AlbumObjectSimplified $album,
+        array                                 $artists,
+        int                                   $discNumber,
+        int                                   $durationMs,
+        bool                                  $explicit,
+        public readonly array                 $externalIds,
+        array                                 $externalUrls,
+        string                                $href,
+        string                                $name,
+        public readonly int                   $popularity,
+        int                                   $trackNumber,
+        string                                $uri,
+        array                                 $availableMarkets = null,
+        public readonly bool                  $isLocal = false,
+        bool                                  $isPlayable = false,
+        TrackLinkObject                       $linkedFrom = null,
+        string                                $previewUrl = null,
+        RestrictionsObject                    $restrictions = null,
     )
     {
         parent::__construct(
@@ -57,6 +57,9 @@ class TrackObjectFullEntity extends TrackObjectSimplified
                 AlbumObjectSimplified::fromItemArrayOfResponse($item['album']);
             $artistObjSimplifiedArray =
                 ArtistObjectSimplified::fromArtistsItemsArrayOfResponse($item['artists']);
+            $restrictionObj = isset($item['restrictions'])
+                ? new RestrictionsObject($item['restrictions']['reason'])
+                : null;
             $array_map[$key] = new TrackObjectFullEntity(
                 id: $item['id'],
                 album: $albumObjSimplified,
@@ -76,7 +79,7 @@ class TrackObjectFullEntity extends TrackObjectSimplified
                 isPlayable: $item['is_playable'] ?? false,
                 linkedFrom: $item['linked_from'] ?? null,
                 previewUrl: $item['preview_url'] ?? null,
-                restrictions: $item['restrictions'] ?? null,
+                restrictions: $restrictionObj ?? null,
             );
         }
         return $array_map;

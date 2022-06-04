@@ -2,8 +2,6 @@
 
 namespace App\Domain\Entities\SpotifyApiCustomResponse;
 
-use _PHPStan_3e014c27f\Nette\Neon\Exception;
-use App\Domain\Entities\SpotifyApi\TrackObjectSimplified;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 
 class TrackPagingObjectSimplified
@@ -14,9 +12,9 @@ class TrackPagingObjectSimplified
      * @param int $totalCount
      */
     public function __construct(
-        public readonly array $items,
+        public readonly array      $items,
         public readonly PagingInfo $pagingInfo,
-        public readonly int $totalCount,
+        public readonly int        $totalCount,
     )
     {
     }

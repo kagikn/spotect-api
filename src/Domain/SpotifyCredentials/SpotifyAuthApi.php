@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\SpotifyCredentials;
 
-use _PHPStan_3e014c27f\Nette\Neon\Exception;
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use GuzzleHttp\Client as GuzzleClient;
 use Psr\Http\Message\ResponseInterface;

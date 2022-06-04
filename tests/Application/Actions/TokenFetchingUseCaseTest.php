@@ -6,7 +6,6 @@ namespace Tests\Application\Actions;
 
 use App\Application\Services\SpotifyClientTokenFetchingService;
 use App\Domain\SpotifyCredentials\SpotifyAuthApi;
-use App\Domain\SpotifyCredentials\SpotifyCredentialsRepository;
 use App\Infrastructure\Persistence\SpotifyCredentials\InMemoryClientCredentialsRepository;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -14,7 +13,6 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Exception\RequestException;
-use Psr\Log\LoggerInterface;
 use Tests\FakeClasses\FakeLogger;
 use Tests\TestCase;
 

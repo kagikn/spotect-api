@@ -7,7 +7,6 @@ namespace App\Infrastructure\Persistence\SpotifyApi;
 use App\Domain\Entities\SpotifyApi\AudioFeaturesObject;
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\SpotifyApi\AudioFeatureRepository;
-use GuzzleHttp\Client as GuzzleClient;
 
 class AudioFeatureApiRepository implements AudioFeatureRepository
 {

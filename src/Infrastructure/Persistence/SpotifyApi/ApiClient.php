@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\SpotifyApi;
 
-use App\Domain\Entities\SpotifyApi\AudioFeaturesObject;
-use App\Domain\SpotifyApi\AudioFeatureRepository;
 use GuzzleHttp\Client as GuzzleClient;
 
 class ApiClient

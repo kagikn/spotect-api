@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Application\Services\FetchSpotifyAudioFeatureService;
 use App\Application\Services\GetSpotifyTrackService;
 use App\Application\Services\SearchSpotifyService;
 use App\Application\Settings\SettingsInterface;

@@ -10,17 +10,16 @@ interface AudioFeatureCacheRepository
 {
     /**
      * @param  AudioFeaturesObject  $audioFeaturesObject
-     * @param  int  $expireFor
+     * @param  int  $expireForIfAdded
      *
      * @return bool
      */
     public function store(
         AudioFeaturesObject $audioFeaturesObject,
-        int $expireFor = 604800
+        int $expireForIfAdded = 604800
     ): bool;
 
     public function get(
-        string $id,
-        int $ExpireForMax = 2592000
+        string $id
     ): ?AudioFeaturesObject;
 }

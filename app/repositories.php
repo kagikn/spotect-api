@@ -23,9 +23,15 @@ return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
         SearchRepository::class => autowire(SearchApiRepository::class),
         TrackRepository::class => autowire(TrackApiRepository::class),
-        AudioFeatureRepository::class => autowire(AudioFeatureApiRepository::class),
-        AudioFeatureCacheRepository::class => autowire(AudioFeatureCacheRedisRepository::class),
+        AudioFeatureRepository::class => autowire(
+            AudioFeatureApiRepository::class
+        ),
+        AudioFeatureCacheRepository::class => autowire(
+            AudioFeatureCacheRedisRepository::class
+        ),
         ISpotifyAuthApi::class => autowire(SpotifyAuthApi::class),
-        SpotifyCredentialsRepository::class => autowire(SqliteSpotifyClientCredentialsRepository::class),
+        SpotifyCredentialsRepository::class => autowire(
+            SqliteSpotifyClientCredentialsRepository::class
+        ),
     ]);
 };

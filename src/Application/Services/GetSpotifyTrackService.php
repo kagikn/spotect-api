@@ -20,17 +20,19 @@ class GetSpotifyTrackService
 
     public function __construct(
         SpotifyClientTokenFetchingService $tokenFetchingService,
-        TrackRepository                   $trackRepository,
-        GeoIPDetectorInterface            $iPDetector,
-    )
-    {
+        TrackRepository $trackRepository,
+        GeoIPDetectorInterface $iPDetector,
+    ) {
         $this->tokenFetchingService = $tokenFetchingService;
         $this->trackRepository = $trackRepository;
         $this->iPDetector = $iPDetector;
     }
 
-    public function getTrack(Request $request, Response $response, array $args): Response
-    {
+    public function getTrack(
+        Request $request,
+        Response $response,
+        array $args
+    ): Response {
         $trackId = $args['id'];
         $acceptLanguage = $request->getHeader('Accept-Language');
 
@@ -40,7 +42,10 @@ class GetSpotifyTrackService
         );
 
         if ($tokenOrErrorRes == null) {
-            return (new ErrorResponse(500, 'internal error'))->writeErrorResponse($response);
+            return (new ErrorResponse(
+                500,
+                'internal error'
+            ))->writeErrorResponse($response);
         }
 
         $token = $tokenOrErrorRes;
@@ -55,7 +60,9 @@ class GetSpotifyTrackService
             return $trackPagingObj->writeErrorResponse($response);
         }
 
-        $jsonBodyToWrite = TrackObjectSimplifiedCustom::fromTrackObjectFull($trackPagingObj)->toJson();
+        $jsonBodyToWrite = TrackObjectSimplifiedCustom::fromTrackObjectFull(
+            $trackPagingObj
+        )->toJson();
 
         $response = $response->withHeader('Content-Type', 'application/json');
         $response->getBody()->write($jsonBodyToWrite);
@@ -64,19 +71,24 @@ class GetSpotifyTrackService
     }
 
     /**
-     * @param string $trackId
-     * @param string $token
-     * @param ?string $acceptLanguage
-     * @return ?TrackObjectFullEntity|ErrorResponse
+     * @param  string  $trackId
+     * @param  string  $token
+     * @param ?string  $acceptLanguage
+     *
+     * @return TrackObjectFullEntity|ErrorResponse
      */
     private function getTrackInternal(
-        string  $trackId,
-        string  $token,
+        string $trackId,
+        string $token,
         ?string $acceptLanguage = null,
-    ): TrackObjectFullEntity|ErrorResponse
-    {
+    ): TrackObjectFullEntity|ErrorResponse {
         $isoCode = $this->iPDetector->detectCountry('JP');
 
-        return $this->trackRepository->getTrackInfo($trackId, $token, $isoCode, $acceptLanguage);
+        return $this->trackRepository->getTrackInfo(
+            $trackId,
+            $token,
+            $isoCode,
+            $acceptLanguage
+        );
     }
 }

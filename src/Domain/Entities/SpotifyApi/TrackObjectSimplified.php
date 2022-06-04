@@ -37,7 +37,6 @@ class TrackObjectSimplified
         public readonly ?TrackLinkObject $linkedFrom = null,
         public readonly ?string $previewUrl = null,
         public readonly ?RestrictionsObject $restrictions = null,
-    )
-    {
+    ) {
     }
 }

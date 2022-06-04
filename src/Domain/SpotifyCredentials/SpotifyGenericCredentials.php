@@ -9,8 +9,10 @@ class SpotifyGenericCredentials implements SpotifyCredentials
     private string $accessToken;
     private int $accessTokenExpirationTimestamp;
 
-    public function __construct(string $accessToken, int $accessTokenExpirationTimestamp)
-    {
+    public function __construct(
+        string $accessToken,
+        int $accessTokenExpirationTimestamp
+    ) {
         $this->accessToken = $accessToken;
         $this->accessTokenExpirationTimestamp = $accessTokenExpirationTimestamp;
     }

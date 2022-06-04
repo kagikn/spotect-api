@@ -18,7 +18,8 @@ class GeoIPDetector implements GeoIPDetectorInterface
     }
 
     /**
-     * @param string $fallbackIsoCode
+     * @param  string  $fallbackIsoCode
+     *
      * @return string
      * @throws InvalidDatabaseException
      */
@@ -26,7 +27,9 @@ class GeoIPDetector implements GeoIPDetectorInterface
     {
         try {
             $geoIPReader = $this->reader;
-            return $geoIPReader->country($this->getIPAddress())->country->isoCode; // can't be null
+            return $geoIPReader->country(
+                $this->getIPAddress()
+            )->country->isoCode; // can't be null
         } catch (AddressNotFoundException) {
             return $fallbackIsoCode;
         }

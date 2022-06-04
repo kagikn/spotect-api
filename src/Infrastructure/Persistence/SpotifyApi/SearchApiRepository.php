@@ -19,19 +19,24 @@ class SearchApiRepository implements SearchRepository
     }
 
     /**
-     * @param array $queryParams
-     * @param string $accessToken
-     * @param ?string $acceptLanguageHeader
+     * @param  array  $queryParams
+     * @param  string  $accessToken
+     * @param ?string  $acceptLanguageHeader
+     *
      * @return TrackPagingObject|ErrorResponse
      * @throws GuzzleException
      */
     public function searchForTrack(
-        array  $queryParams,
+        array $queryParams,
         string $accessToken,
         string $acceptLanguageHeader = null
-    ): TrackPagingObject|ErrorResponse
-    {
-        $res = $this->client->get('search', $accessToken, $queryParams, $acceptLanguageHeader);
+    ): TrackPagingObject|ErrorResponse {
+        $res = $this->client->get(
+            'search',
+            $accessToken,
+            $queryParams,
+            $acceptLanguageHeader
+        );
 
         $jsonBody = $res->getBody()->getContents();
         $statusCode = $res->getStatusCode();
@@ -44,6 +49,8 @@ class SearchApiRepository implements SearchRepository
 
         $searchResultJson = json_decode($jsonBody, true);
 
-        return TrackPagingObject::fromTrackSearchResponse($searchResultJson['tracks']);
+        return TrackPagingObject::fromTrackSearchResponse(
+            $searchResultJson['tracks']
+        );
     }
 }

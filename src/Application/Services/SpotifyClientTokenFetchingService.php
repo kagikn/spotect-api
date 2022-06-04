@@ -17,46 +17,56 @@ class SpotifyClientTokenFetchingService
     protected LoggerInterface $logger;
 
     public function __construct(
-        ISpotifyAuthApi              $authApi,
+        ISpotifyAuthApi $authApi,
         SpotifyCredentialsRepository $credentialsRepository,
-        LoggerInterface              $logger,
-    )
-    {
+        LoggerInterface $logger,
+    ) {
         $this->authApi = $authApi;
         $this->credentialsRepository = $credentialsRepository;
         $this->logger = $logger;
     }
 
     /**
-     * @param string $clientId
-     * @param string $clientSecret
-     * @param ?int $timeoutUnixTimestamp
+     * @param  string  $clientId
+     * @param  string  $clientSecret
+     * @param  int|null  $refreshOffsetTimeBeforeTimeout
+     *
      * @return ?SpotifyCredentials
      */
     public function fetch(
         string $clientId,
         string $clientSecret,
-        ?int   $refreshOffsetTimeBeforeTimeout = 300
-    ): ?SpotifyCredentials
-    {
+        ?int $refreshOffsetTimeBeforeTimeout = 300
+    ): ?SpotifyCredentials {
         $timeoutUnixTimestamp = time() + $refreshOffsetTimeBeforeTimeout;
 
         $cachedToken = $this->credentialsRepository->get();
-        if (isset($cachedToken) && $cachedToken->getAccessTokenExpirationTimestamp() > $timeoutUnixTimestamp) {
+        if (
+            isset($cachedToken)
+            && $cachedToken->getAccessTokenExpirationTimestamp()
+            > $timeoutUnixTimestamp
+        ) {
             return $cachedToken;
         }
 
-        $tokenOrErrorRes = $this->authApi->getTokenClientCredentials($clientId, $clientSecret);
+        $tokenOrErrorRes = $this->authApi->getTokenClientCredentials(
+            $clientId,
+            $clientSecret
+        );
         if ($tokenOrErrorRes instanceof ErrorResponse) {
-            $this->logger->error('Could not fetch client access token.' .
-                'The client ID or client secret are wrong or Auth API of Spotify is down.');
+            $this->logger->error(
+                'Could not fetch client access token.' .
+                'The client ID or client secret are wrong or Auth API of Spotify is down.'
+            );
             return null;
         }
 
         $token = $tokenOrErrorRes;
         if (!$this->credentialsRepository->store($token)) {
-            $this->logger->warning("Token was able to be fetched from Spotify API," .
-                "but CredentialsRepository could not store it.");
+            $this->logger->warning(
+                "Token was able to be fetched from Spotify API," .
+                "but CredentialsRepository could not store it."
+            );
         }
         return $token;
     }

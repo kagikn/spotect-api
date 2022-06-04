@@ -13,18 +13,28 @@ class AudioFeatureCacheRedisRepository implements AudioFeatureCacheRepository
     private const CREATED_AT_KEY_STR = 'created_at';
 
     /**
-     * @param AudioFeaturesObject $audioFeaturesObject
-     * @param int $expireFor
+     * @param  AudioFeaturesObject  $audioFeaturesObject
+     * @param  int  $expireFor
+     *
      * @return bool
      */
-    public function store(AudioFeaturesObject $audioFeaturesObject, int $expireFor = 604800): bool
-    {
+    public function store(
+        AudioFeaturesObject $audioFeaturesObject,
+        int $expireFor = 604800
+    ): bool {
         $redis = new Redis();
-        if (!$redis->pconnect($_ENV['REDIS_HOST'], intval($_ENV['REDIS_PORT']), floatval($_ENV['REDIS_TIMEOUT']))) {
+        if (
+            !$redis->pconnect(
+                $_ENV['REDIS_HOST'],
+                intval($_ENV['REDIS_PORT']),
+                floatval($_ENV['REDIS_TIMEOUT'])
+            )
+        ) {
             return false;
         }
 
-        $baseKey = self::SPOTIFY_AUDIO_FEATURE_KEY_NAME . $audioFeaturesObject->id;
+        $baseKey = self::SPOTIFY_AUDIO_FEATURE_KEY_NAME
+            . $audioFeaturesObject->id;
 
         if ($redis->exists($baseKey)) {
             $redis->multi();
@@ -37,7 +47,10 @@ class AudioFeatureCacheRedisRepository implements AudioFeatureCacheRepository
             $redis->multi();
             $redis->hMSet(
                 $baseKey,
-                ['values' => $audioFeaturesObject->valuesToJson(), self::CREATED_AT_KEY_STR => strval(time())]
+                [
+                    'values' => $audioFeaturesObject->valuesToJson(),
+                    self::CREATED_AT_KEY_STR => strval(time())
+                ]
             );
         }
         $redis->expire($baseKey, $expireFor);
@@ -46,10 +59,19 @@ class AudioFeatureCacheRedisRepository implements AudioFeatureCacheRepository
         return true;
     }
 
-    public function get(string $id, int $expireFor = 604800, int $ExpireForMax = 2592000): ?AudioFeaturesObject
-    {
+    public function get(
+        string $id,
+        int $expireFor = 604800,
+        int $expireForMax = 2592000
+    ): ?AudioFeaturesObject {
         $redis = new Redis();
-        if (!$redis->pconnect($_ENV['REDIS_HOST'], intval($_ENV['REDIS_PORT']), floatval($_ENV['REDIS_TIMEOUT']))) {
+        if (
+            !$redis->pconnect(
+                $_ENV['REDIS_HOST'],
+                intval($_ENV['REDIS_PORT']),
+                floatval($_ENV['REDIS_TIMEOUT'])
+            )
+        ) {
             return null;
         }
 
@@ -57,8 +79,10 @@ class AudioFeatureCacheRedisRepository implements AudioFeatureCacheRepository
         if (!$redis->exists($baseKey)) {
             return null;
         }
-        $createdAtVal = intval($redis->hGet($baseKey, self::CREATED_AT_KEY_STR));
-        if ($createdAtVal + $ExpireForMax < time()) {
+        $createdAtVal = intval(
+            $redis->hGet($baseKey, self::CREATED_AT_KEY_STR)
+        );
+        if ($createdAtVal + $expireForMax < time()) {
             $redis->del($baseKey);
             return null;
         }

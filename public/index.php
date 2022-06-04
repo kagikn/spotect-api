@@ -69,7 +69,11 @@ $responseFactory = $app->getResponseFactory();
 $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
 
 // Create Shutdown Handler
-$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
+$shutdownHandler = new ShutdownHandler(
+    $request,
+    $errorHandler,
+    $displayErrorDetails
+);
 register_shutdown_function($shutdownHandler);
 
 // Add Routing Middleware
@@ -79,7 +83,11 @@ $app->addRoutingMiddleware();
 $app->addBodyParsingMiddleware();
 
 // Add Error Middleware
-$errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, $logError, $logErrorDetails);
+$errorMiddleware = $app->addErrorMiddleware(
+    $displayErrorDetails,
+    $logError,
+    $logErrorDetails
+);
 $errorMiddleware->setDefaultErrorHandler($errorHandler);
 
 // Run App & Emit Response

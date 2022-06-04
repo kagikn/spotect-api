@@ -5,24 +5,24 @@ namespace App\Domain\Entities\SpotifyApi;
 class AudioFeaturesObject
 {
     /**
-     * @param string $id
-     * @param float $acousticness
-     * @param string $analysisUrl
-     * @param float $danceability
-     * @param int $durationMs
-     * @param float $energy
-     * @param float $instrumentalness
-     * @param int $key
-     * @param float $liveness
-     * @param float $loudness
-     * @param int $mode
-     * @param float $speechiness
-     * @param float $tempo
-     * @param int $timeSignature
-     * @param string $trackHref
-     * @param string $type
-     * @param string $uri
-     * @param float $valence
+     * @param  string  $id
+     * @param  float  $acousticness
+     * @param  string  $analysisUrl
+     * @param  float  $danceability
+     * @param  int  $durationMs
+     * @param  float  $energy
+     * @param  float  $instrumentalness
+     * @param  int  $key
+     * @param  float  $liveness
+     * @param  float  $loudness
+     * @param  int  $mode
+     * @param  float  $speechiness
+     * @param  float  $tempo
+     * @param  int  $timeSignature
+     * @param  string  $trackHref
+     * @param  string  $type
+     * @param  string  $uri
+     * @param  float  $valence
      */
     public function __construct(
         public readonly string $id,
@@ -43,8 +43,71 @@ class AudioFeaturesObject
         public readonly string $type,
         public readonly string $uri,
         public readonly float $valence
-    )
+    ) {
+    }
+
+    public static function fromValueJsonAndId(
+        string $id,
+        string $valueJson
+    ): AudioFeaturesObject {
+        $audioFeatureValueArrayAssoc = json_decode(
+            $valueJson,
+            true,
+            512,
+            JSON_BIGINT_AS_STRING
+        );
+
+        return new AudioFeaturesObject(
+            $id,
+            $audioFeatureValueArrayAssoc['acousticness'],
+            $audioFeatureValueArrayAssoc['analysis_url'],
+            $audioFeatureValueArrayAssoc['danceability'],
+            $audioFeatureValueArrayAssoc['duration_ms'],
+            $audioFeatureValueArrayAssoc['energy'],
+            $audioFeatureValueArrayAssoc['instrumentalness'],
+            $audioFeatureValueArrayAssoc['key'],
+            $audioFeatureValueArrayAssoc['liveness'],
+            $audioFeatureValueArrayAssoc['loudness'],
+            $audioFeatureValueArrayAssoc['mode'],
+            $audioFeatureValueArrayAssoc['speechiness'],
+            $audioFeatureValueArrayAssoc['tempo'],
+            $audioFeatureValueArrayAssoc['time_signature'],
+            $audioFeatureValueArrayAssoc['track_href'],
+            $audioFeatureValueArrayAssoc['type'],
+            $audioFeatureValueArrayAssoc['uri'],
+            $audioFeatureValueArrayAssoc['valence'],
+        );
+    }
+
+    public static function fromJson(string $itemArray): AudioFeaturesObject
     {
+        $audioFeatureArrayAssoc = json_decode(
+            $itemArray,
+            true,
+            512,
+            JSON_BIGINT_AS_STRING
+        );
+
+        return new AudioFeaturesObject(
+            $audioFeatureArrayAssoc['id'],
+            $audioFeatureArrayAssoc['acousticness'],
+            $audioFeatureArrayAssoc['analysis_url'],
+            $audioFeatureArrayAssoc['danceability'],
+            $audioFeatureArrayAssoc['duration_ms'],
+            $audioFeatureArrayAssoc['energy'],
+            $audioFeatureArrayAssoc['instrumentalness'],
+            $audioFeatureArrayAssoc['key'],
+            $audioFeatureArrayAssoc['liveness'],
+            $audioFeatureArrayAssoc['loudness'],
+            $audioFeatureArrayAssoc['mode'],
+            $audioFeatureArrayAssoc['speechiness'],
+            $audioFeatureArrayAssoc['tempo'],
+            $audioFeatureArrayAssoc['time_signature'],
+            $audioFeatureArrayAssoc['track_href'],
+            $audioFeatureArrayAssoc['type'],
+            $audioFeatureArrayAssoc['uri'],
+            $audioFeatureArrayAssoc['valence'],
+        );
     }
 
     public function mainValuesToJson(): string
@@ -91,62 +154,5 @@ class AudioFeaturesObject
         ];
 
         return json_encode($array, JSON_PRESERVE_ZERO_FRACTION);
-    }
-
-    public static function fromValueJsonAndId(string $id, string $valueJson): AudioFeaturesObject
-    {
-        $audioFeatureValueArrayAssoc = json_decode($valueJson, true, 512, JSON_BIGINT_AS_STRING);
-
-        return new AudioFeaturesObject(
-            $id,
-            $audioFeatureValueArrayAssoc['acousticness'],
-            $audioFeatureValueArrayAssoc['analysis_url'],
-            $audioFeatureValueArrayAssoc['danceability'],
-            $audioFeatureValueArrayAssoc['duration_ms'],
-            $audioFeatureValueArrayAssoc['energy'],
-            $audioFeatureValueArrayAssoc['instrumentalness'],
-            $audioFeatureValueArrayAssoc['key'],
-            $audioFeatureValueArrayAssoc['liveness'],
-            $audioFeatureValueArrayAssoc['loudness'],
-            $audioFeatureValueArrayAssoc['mode'],
-            $audioFeatureValueArrayAssoc['speechiness'],
-            $audioFeatureValueArrayAssoc['tempo'],
-            $audioFeatureValueArrayAssoc['time_signature'],
-            $audioFeatureValueArrayAssoc['track_href'],
-            $audioFeatureValueArrayAssoc['type'],
-            $audioFeatureValueArrayAssoc['uri'],
-            $audioFeatureValueArrayAssoc['valence'],
-        );
-    }
-
-    public static function fromJson(string $audioFeatureJsonStr): AudioFeaturesObject
-    {
-        $audioFeatureArrayAssoc = json_decode($audioFeatureJsonStr, true, 512, JSON_BIGINT_AS_STRING);
-
-        return new AudioFeaturesObject(
-            $audioFeatureArrayAssoc['id'],
-            $audioFeatureArrayAssoc['acousticness'],
-            $audioFeatureArrayAssoc['analysis_url'],
-            $audioFeatureArrayAssoc['danceability'],
-            $audioFeatureArrayAssoc['duration_ms'],
-            $audioFeatureArrayAssoc['energy'],
-            $audioFeatureArrayAssoc['instrumentalness'],
-            $audioFeatureArrayAssoc['key'],
-            $audioFeatureArrayAssoc['liveness'],
-            $audioFeatureArrayAssoc['loudness'],
-            $audioFeatureArrayAssoc['mode'],
-            $audioFeatureArrayAssoc['speechiness'],
-            $audioFeatureArrayAssoc['tempo'],
-            $audioFeatureArrayAssoc['time_signature'],
-            $audioFeatureArrayAssoc['track_href'],
-            $audioFeatureArrayAssoc['type'],
-            $audioFeatureArrayAssoc['uri'],
-            $audioFeatureArrayAssoc['valence'],
-        );
-    }
-
-    private static function floatToStringNoScientificNotation(float $val): string
-    {
-        return rtrim(sprintf("%.14f", $val), 0);
     }
 }

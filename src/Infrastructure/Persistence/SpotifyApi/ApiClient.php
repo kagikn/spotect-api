@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\SpotifyApi;
 
 use GuzzleHttp\Client as GuzzleClient;
+use Psr\Http\Message\ResponseInterface;
 
 class ApiClient
 {
@@ -12,26 +13,30 @@ class ApiClient
 
     public function __construct()
     {
-        $this->client = new GuzzleClient(['base_uri' => 'https://api.spotify.com/v1/']);
+        $this->client = new GuzzleClient(
+            ['base_uri' => 'https://api.spotify.com/v1/']
+        );
     }
 
     public function get(
-        string       $endpoint,
-        string       $accessToken,
+        string $endpoint,
+        string $accessToken,
         array|string $query = null,
-        string       $acceptLanguageHeader = null
-    )
-    {
-        $configArray = $this->formatRequestConfigArray($accessToken, $query, $acceptLanguageHeader);
+        string $acceptLanguageHeader = null
+    ): ResponseInterface {
+        $configArray = $this->formatRequestConfigArray(
+            $accessToken,
+            $query,
+            $acceptLanguageHeader
+        );
         return $this->client->get($endpoint, $configArray);
     }
 
     private function formatRequestConfigArray(
-        string       $accessToken,
+        string $accessToken,
         array|string $query = null,
-        string       $acceptLanguageHeader = null
-    )
-    {
+        string $acceptLanguageHeader = null
+    ): array {
         $headers = [
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json'

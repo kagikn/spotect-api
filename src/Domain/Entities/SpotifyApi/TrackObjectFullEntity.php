@@ -5,27 +5,26 @@ namespace App\Domain\Entities\SpotifyApi;
 class TrackObjectFullEntity extends TrackObjectSimplified
 {
     public function __construct(
-        string                                $id,
+        string $id,
         public readonly AlbumObjectSimplified $album,
-        array                                 $artists,
-        int                                   $discNumber,
-        int                                   $durationMs,
-        bool                                  $explicit,
-        public readonly array                 $externalIds,
-        array                                 $externalUrls,
-        string                                $href,
-        string                                $name,
-        public readonly int                   $popularity,
-        int                                   $trackNumber,
-        string                                $uri,
-        array                                 $availableMarkets = null,
-        public readonly bool                  $isLocal = false,
-        bool                                  $isPlayable = false,
-        TrackLinkObject                       $linkedFrom = null,
-        string                                $previewUrl = null,
-        RestrictionsObject                    $restrictions = null,
-    )
-    {
+        array $artists,
+        int $discNumber,
+        int $durationMs,
+        bool $explicit,
+        public readonly array $externalIds,
+        array $externalUrls,
+        string $href,
+        string $name,
+        public readonly int $popularity,
+        int $trackNumber,
+        string $uri,
+        array $availableMarkets = null,
+        public readonly bool $isLocal = false,
+        bool $isPlayable = false,
+        TrackLinkObject $linkedFrom = null,
+        string $previewUrl = null,
+        RestrictionsObject $restrictions = null,
+    ) {
         parent::__construct(
             $id,
             $artists,
@@ -46,31 +45,39 @@ class TrackObjectFullEntity extends TrackObjectSimplified
     }
 
     /**
-     * @param array $trackObjs
+     * @param  array  $trackObjs
+     *
      * @return TrackObjectFullEntity[]
      */
     public static function fromItemsArrayOfResponse(array $trackObjs): array
     {
-        return array_map(fn($trackObj) => self::fromTrackObjItemArray($trackObj), $trackObjs);
+        return array_map(
+            fn($trackObj) => self::fromTrackObjItemArray($trackObj),
+            $trackObjs
+        );
     }
 
     /**
-     * @param array $trackObj
+     * @param  array  $trackObj
+     *
      * @return TrackObjectFullEntity
      */
-    public static function fromTrackObjItemArray(array $trackObj): TrackObjectFullEntity
-    {
-        $albumObjSimplified =
-            AlbumObjectSimplified::fromItemArrayOfResponse($trackObj['album']);
-        $artistObjSimplifiedArray =
-            ArtistObjectSimplified::fromArtistsItemsArrayOfResponse($trackObj['artists']);
+    public static function fromTrackObjItemArray(
+        array $trackObj
+    ): TrackObjectFullEntity {
+        $albumObjSimplified = AlbumObjectSimplified::fromItemArray(
+            $trackObj['album']
+        );
+        $artistObjSimplified = ArtistObjectSimplified::fromItemCollectionArray(
+            $trackObj['artists']
+        );
         $restrictionObj = isset($trackObj['restrictions'])
             ? new RestrictionsObject($trackObj['restrictions']['reason'])
             : null;
         return new TrackObjectFullEntity(
             id: $trackObj['id'],
             album: $albumObjSimplified,
-            artists: $artistObjSimplifiedArray,
+            artists: $artistObjSimplified,
             discNumber: $trackObj['disc_number'],
             durationMs: $trackObj['duration_ms'],
             explicit: $trackObj['explicit'],

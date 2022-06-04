@@ -5,13 +5,13 @@ namespace App\Domain\Entities\SpotifyApi;
 class TrackPagingObject
 {
     /**
-     * @param string $href
-     * @param TrackObjectFullEntity[] $items
-     * @param int $limit
-     * @param int $offset
-     * @param int $total
-     * @param ?string $next
-     * @param ?string $previous
+     * @param  string  $href
+     * @param  TrackObjectFullEntity[]  $items
+     * @param  int  $limit
+     * @param  int  $offset
+     * @param  int  $total
+     * @param ?string  $next
+     * @param ?string  $previous
      */
     public function __construct(
         public readonly string $href,
@@ -21,24 +21,27 @@ class TrackPagingObject
         public readonly int $total,
         public readonly ?string $next = null,
         public readonly ?string $previous = null,
-    )
-    {
+    ) {
     }
 
     /**
-     * @param array $trackPagingInfoJson
+     * @param  array  $itemCollection
+     *
      * @return ?TrackPagingObject
      */
-    public static function fromTrackSearchResponse(array $trackPagingInfoJson): ?TrackPagingObject
-    {
+    public static function fromTrackSearchResponse(
+        array $itemCollection
+    ): ?TrackPagingObject {
         return new TrackPagingObject(
-            href: $trackPagingInfoJson['href'],
-            items: TrackObjectFullEntity::fromItemsArrayOfResponse($trackPagingInfoJson['items']),
-            limit: $trackPagingInfoJson['limit'],
-            offset: $trackPagingInfoJson['offset'],
-            total: $trackPagingInfoJson['total'],
-            next: $trackPagingInfoJson['next'] ?? null,
-            previous: $trackPagingInfoJson['previous'] ?? null,
+            href: $itemCollection['href'],
+            items: TrackObjectFullEntity::fromItemsArrayOfResponse(
+                $itemCollection['items']
+            ),
+            limit: $itemCollection['limit'],
+            offset: $itemCollection['offset'],
+            total: $itemCollection['total'],
+            next: $itemCollection['next'] ?? null,
+            previous: $itemCollection['previous'] ?? null,
         );
     }
 }

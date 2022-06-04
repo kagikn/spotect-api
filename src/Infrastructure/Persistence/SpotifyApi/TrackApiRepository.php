@@ -18,10 +18,11 @@ class TrackApiRepository implements TrackRepository
     }
 
     /**
-     * @param string $trackId
-     * @param string $accessToken
-     * @param ?string $market
-     * @param ?string $acceptLanguageHeader
+     * @param  string  $trackId
+     * @param  string  $accessToken
+     * @param ?string  $market
+     * @param ?string  $acceptLanguageHeader
+     *
      * @return TrackObjectFullEntity|ErrorResponse
      */
     public function getTrackInfo(
@@ -29,8 +30,7 @@ class TrackApiRepository implements TrackRepository
         string $accessToken,
         string $market = null,
         string $acceptLanguageHeader = null
-    ): TrackObjectFullEntity|ErrorResponse
-    {
+    ): TrackObjectFullEntity|ErrorResponse {
         $res = $this->client->get(
             'tracks/' . $trackId,
             $accessToken,

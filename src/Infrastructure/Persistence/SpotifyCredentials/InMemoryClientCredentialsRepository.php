@@ -8,7 +8,8 @@ use App\Domain\SpotifyCredentials\SpotifyCredentials;
 use App\Domain\SpotifyCredentials\SpotifyCredentialsRepository;
 use App\Domain\SpotifyCredentials\SpotifyGenericCredentials;
 
-class InMemoryClientCredentialsRepository implements SpotifyCredentialsRepository
+class InMemoryClientCredentialsRepository implements
+    SpotifyCredentialsRepository
 {
     public ?string $tokenDataEncrypted;
 
@@ -22,7 +23,8 @@ class InMemoryClientCredentialsRepository implements SpotifyCredentialsRepositor
     public function store(SpotifyCredentials $credentials): bool
     {
         $accessToken = $credentials->getAccessToken();
-        $accessTokenExpirationTimestamp = $credentials->getAccessTokenExpirationTimestamp();
+        $accessTokenExpirationTimestamp
+            = $credentials->getAccessTokenExpirationTimestamp();
 
         if ($accessToken == '') {
             return false;

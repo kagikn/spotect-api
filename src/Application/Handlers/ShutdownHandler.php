@@ -26,7 +26,7 @@ class ShutdownHandler
         $this->displayErrorDetails = $displayErrorDetails;
     }
 
-    public function __invoke()
+    public function __invoke(): void
     {
         $error = error_get_last();
         if ($error) {
@@ -34,7 +34,8 @@ class ShutdownHandler
             $errorLine = $error['line'];
             $errorMessage = $error['message'];
             $errorType = $error['type'];
-            $message = 'An error while processing your request. Please try again later.';
+            $message
+                = 'An error while processing your request. Please try again later.';
 
             if ($this->displayErrorDetails) {
                 switch ($errorType) {
@@ -58,7 +59,10 @@ class ShutdownHandler
                 }
             }
 
-            $exception = new HttpInternalServerErrorException($this->request, $message);
+            $exception = new HttpInternalServerErrorException(
+                $this->request,
+                $message
+            );
             $response = $this->errorHandler->__invoke(
                 $this->request,
                 $exception,

@@ -10,13 +10,14 @@ use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 interface SearchRepository
 {
     /**
-     * @param array $queryParams
-     * @param string $accessToken
-     * @param ?string $acceptLanguageHeader
+     * @param  array  $queryParams
+     * @param  string  $accessToken
+     * @param ?string  $acceptLanguageHeader
+     *
      * @return TrackPagingObject|ErrorResponse
      */
     public function searchForTrack(
-        array  $queryParams,
+        array $queryParams,
         string $accessToken,
         string $acceptLanguageHeader = null
     ): TrackPagingObject|ErrorResponse;

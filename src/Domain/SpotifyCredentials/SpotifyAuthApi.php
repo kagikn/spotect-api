@@ -15,24 +15,9 @@ class SpotifyAuthApi implements ISpotifyAuthApi
     public function __construct(GuzzleClient $guzzleClient = null)
     {
         $this->guzzleClient = $guzzleClient
-            ?? new GuzzleClient(['base_uri' => 'https://accounts.spotify.com/api/token/']);
-    }
-
-    private function tryFetchToken(string $clientId, string $clientSecret): ?ResponseInterface
-    {
-        try {
-            return $this->guzzleClient->post('', [
-                'headers' => [
-                    'Authorization' => 'Basic ' . base64_encode($clientId . ':' . $clientSecret)
-                ],
-                'form_params' => [
-                    'grant_type' => 'client_credentials'
-                ],
-                'http_errors' => false,
-            ]);
-        } catch (\GuzzleHttp\Exception\GuzzleException $ex) {
-            return null;
-        }
+            ?? new GuzzleClient(
+                ['base_uri' => 'https://accounts.spotify.com/api/token/']
+            );
     }
 
     /**
@@ -41,8 +26,7 @@ class SpotifyAuthApi implements ISpotifyAuthApi
     public function getTokenClientCredentials(
         string $clientId,
         string $clientSecret
-    ): SpotifyGenericCredentials|ErrorResponse
-    {
+    ): SpotifyGenericCredentials|ErrorResponse {
         $res = $this->tryFetchToken($clientId, $clientSecret);
 
         $json = json_decode($res->getBody()->getContents(), true);
@@ -58,5 +42,25 @@ class SpotifyAuthApi implements ISpotifyAuthApi
             $json['access_token'],
             $json['expires_in'] + time()
         );
+    }
+
+    private function tryFetchToken(
+        string $clientId,
+        string $clientSecret
+    ): ?ResponseInterface {
+        $authStr = 'Basic ' . base64_encode($clientId . ':' . $clientSecret);
+        try {
+            return $this->guzzleClient->post('', [
+                'headers' => [
+                    'Authorization' => $authStr
+                ],
+                'form_params' => [
+                    'grant_type' => 'client_credentials'
+                ],
+                'http_errors' => false,
+            ]);
+        } catch (\GuzzleHttp\Exception\GuzzleException $ex) {
+            return null;
+        }
     }
 }

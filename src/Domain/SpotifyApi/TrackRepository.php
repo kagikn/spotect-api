@@ -10,10 +10,11 @@ use App\Domain\Entities\SpotifyApi\TrackObjectFullEntity;
 interface TrackRepository
 {
     /**
-     * @param string $trackId
-     * @param string $accessToken
-     * @param ?string $market
-     * @param ?string $acceptLanguageHeader
+     * @param  string  $trackId
+     * @param  string  $accessToken
+     * @param ?string  $market
+     * @param ?string  $acceptLanguageHeader
+     *
      * @return TrackObjectFullEntity|ErrorResponse
      */
     public function getTrackInfo(

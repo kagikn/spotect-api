@@ -62,27 +62,20 @@ class ParseSpotifyEntityTest extends TestCase
         return [[[$trackArray]]];
     }
 
-    public function imageObjectArrayProvider(): array
+    public function artistsArrayProvider(): array
     {
-        $firstImgArray = [
+        $firstArtistsArray = [
             [
-                'height' => 600,
-                'width' => 600,
-                'url' => 'https://i.spotect.com/xClu3xzhrC9p_TH7yS_rjWT66jxNZ-oZ_hn9WdWC7v9ukBuX3j8ivw'
-            ],
-            [
-                'height' => 300,
-                'width' => 300,
-                'url' => 'https://i.spotect.com/xClu3xzhrC9p_TH7yS_rjWT66jxNZ-oZ_hn9WdWC7v9ukBuX3j8ivw'
-            ],
-            [
-                'height' => 64,
-                'width' => 64,
-                'url' => 'https://i.spotect.com/xClu3xzhrC9p_TH7yS_rjWT66jxNZ-oZ_hn9WdWC7v9ukBuX3j8ivw'
-            ],
+                'id' => 'adfdadf',
+                'external_urls' => ['spotify' => 'https://spotect.com'],
+                'href' => 'https://spotect.com',
+                'name' => 'some name',
+                'type' => 'artist',
+                'uri' => 'spotify:' . 'adfdadf',
+            ]
         ];
 
-        return [[$firstImgArray]];
+        return [[$firstArtistsArray]];
     }
 
     public function albumArrayProvider(): array
@@ -108,23 +101,34 @@ class ParseSpotifyEntityTest extends TestCase
             'restrictions' => null,
         ];
 
-        return [[
-            $albumArray
-        ]];
+        return [
+            [
+                $albumArray
+            ]
+        ];
     }
 
-    public function artistsArrayProvider(): array
+    public function imageObjectArrayProvider(): array
     {
-        $firstArtistsArray = [[
-            'id' => 'adfdadf',
-            'external_urls' => ['spotify' => 'https://spotect.com'],
-            'href' => 'https://spotect.com',
-            'name' => 'some name',
-            'type' => 'artist',
-            'uri' => 'spotify:' . 'adfdadf',
-        ]];
+        $firstImgArray = [
+            [
+                'height' => 600,
+                'width' => 600,
+                'url' => 'https://i.spotect.com/xClu3xzhrC9p_TH7yS_rjWT66jxNZ-oZ_hn9WdWC7v9ukBuX3j8ivw'
+            ],
+            [
+                'height' => 300,
+                'width' => 300,
+                'url' => 'https://i.spotect.com/xClu3xzhrC9p_TH7yS_rjWT66jxNZ-oZ_hn9WdWC7v9ukBuX3j8ivw'
+            ],
+            [
+                'height' => 64,
+                'width' => 64,
+                'url' => 'https://i.spotect.com/xClu3xzhrC9p_TH7yS_rjWT66jxNZ-oZ_hn9WdWC7v9ukBuX3j8ivw'
+            ],
+        ];
 
-        return [[$firstArtistsArray]];
+        return [[$firstImgArray]];
     }
 
     public function trackArrayProviderWithoutAlbumAndArtists(): array
@@ -148,31 +152,35 @@ class ParseSpotifyEntityTest extends TestCase
             'restrictions' => null,
         ];
 
-        return [[
+        return [
             [
-                'height' => 600,
-                'width' => 600,
-                'url' => 'https://i.spotect.com/mRQByf0TiIc6CEXMm1D7uRmbf5wQVZMOcppn_Li0ZN4TqeaB0VQQZg'
-            ],
-            [
-                'height' => 300,
-                'width' => 300,
-                'url' => 'https://i.spotect.com/mRQByf0TiIc6CEXMm1D7uRmbf5wQVZMOcppn_Li0ZN4TqeaB0VQQZg'
-            ],
-            [
-                'height' => 64,
-                'width' => 64,
-                'url' => 'https://i.spotect.com/mRQByf0TiIc6CEXMm1D7uRmbf5wQVZMOcppn_Li0ZN4TqeaB0VQQZg'
-            ],
-        ]];
+                [
+                    'height' => 600,
+                    'width' => 600,
+                    'url' => 'https://i.spotect.com/mRQByf0TiIc6CEXMm1D7uRmbf5wQVZMOcppn_Li0ZN4TqeaB0VQQZg'
+                ],
+                [
+                    'height' => 300,
+                    'width' => 300,
+                    'url' => 'https://i.spotect.com/mRQByf0TiIc6CEXMm1D7uRmbf5wQVZMOcppn_Li0ZN4TqeaB0VQQZg'
+                ],
+                [
+                    'height' => 64,
+                    'width' => 64,
+                    'url' => 'https://i.spotect.com/mRQByf0TiIc6CEXMm1D7uRmbf5wQVZMOcppn_Li0ZN4TqeaB0VQQZg'
+                ],
+            ]
+        ];
     }
 
     /**
      * @dataProvider imageObjectArrayProvider
      */
-    public function testJsonDeserializeImageObjectArray(array $responseJsonArray)
+    public function testJsonDeserializeImageObjectArray(array $responseArray)
     {
-        $imageObjs = ImageObject::fromImageObjectItemsArrayOfResponse($responseJsonArray);
+        $imageObjs = ImageObject::fromImageObjectItemsArrayOfResponse(
+            $responseArray
+        );
         $this->assertIsArray($imageObjs);
         $this->assertInstanceOf(ImageObject::class, $imageObjs[0]);
     }
@@ -180,9 +188,12 @@ class ParseSpotifyEntityTest extends TestCase
     /**
      * @dataProvider artistsArrayProvider
      */
-    public function testJsonDeserializeArtistObjectSimplified(array $responseJsonArray)
-    {
-        $artistObjs = ArtistObjectSimplified::fromArtistsItemsArrayOfResponse($responseJsonArray);
+    public function testJsonDeserializeArtistObjectSimplified(
+        array $responseJsonArray
+    ) {
+        $artistObjs = ArtistObjectSimplified::fromItemCollectionArray(
+            $responseJsonArray
+        );
         $this->assertIsArray($artistObjs);
         $this->assertInstanceOf(ArtistObjectSimplified::class, $artistObjs[0]);
     }
@@ -192,12 +203,16 @@ class ParseSpotifyEntityTest extends TestCase
      * @depends      testJsonDeserializeImageObjectArray
      * @depends      testJsonDeserializeArtistObjectSimplified
      * Checks if two depending functions work before testing this function.
-     * The "depends" annotations are used only to check if the depending functions work, which
-     * AlbumObjectSimplified::fromItemArrayOfResponse calls.
+     * The "depends" annotations are used only to check if the depending
+     *     functions work, which AlbumObjectSimplified::fromItemArrayOfResponse
+     *     calls.
      */
-    public function testJsonDeserializeAlbumObjectSimplified(array $responseJsonArray)
-    {
-        $albumObj = AlbumObjectSimplified::fromItemArrayOfResponse($responseJsonArray);
+    public function testJsonDeserializeAlbumObjectSimplified(
+        array $responseJsonArray
+    ) {
+        $albumObj = AlbumObjectSimplified::fromItemArray(
+            $responseJsonArray
+        );
         $this->assertInstanceOf(AlbumObjectSimplified::class, $albumObj);
     }
 
@@ -206,13 +221,17 @@ class ParseSpotifyEntityTest extends TestCase
      * @depends      testJsonDeserializeImageObjectArray
      * @depends      testJsonDeserializeArtistObjectSimplified
      * @depends      testJsonDeserializeAlbumObjectSimplified
-     * Checks if all the three depending functions work before testing this function.
-     * The "depends" annotations are used only to check if all the depending functions work, which
-     * AlbumObjectSimplified::fromItemArrayOfResponse calls.
+     * Checks if all the three depending functions work before testing this
+     *     function. The "depends" annotations are used only to check if all
+     *     the depending functions work, which
+     *     AlbumObjectSimplified::fromItemArrayOfResponse calls.
      */
-    public function testJsonDeserializeTrackObjectFullEntity(array $responseJsonArray): array
-    {
-        $trackObjs = TrackObjectFullEntity::fromItemsArrayOfResponse($responseJsonArray);
+    public function testJsonDeserializeTrackObjectFullEntity(
+        array $responseJsonArray
+    ): array {
+        $trackObjs = TrackObjectFullEntity::fromItemsArrayOfResponse(
+            $responseJsonArray
+        );
         $this->assertIsArray($trackObjs);
         $this->assertEquals(1, count($trackObjs));
         $this->assertInstanceOf(TrackObjectFullEntity::class, $trackObjs[0]);
@@ -224,10 +243,15 @@ class ParseSpotifyEntityTest extends TestCase
      * @dataProvider trackObjectFullEntityProvider
      * @depends      testJsonDeserializeTrackObjectFullEntity
      */
-    public function testConvertTrackObjFullToTrackObjSimplifiedCustom(array $responseJsonArray)
-    {
-        $trackObjs = TrackObjectFullEntity::fromItemsArrayOfResponse($responseJsonArray);
-        $trackObj = TrackObjectSimplifiedCustom::fromTrackObjectFull($trackObjs[0]);
+    public function testConvertTrackObjFullToTrackObjSimplifiedCustom(
+        array $responseJsonArray
+    ) {
+        $trackObjs = TrackObjectFullEntity::fromItemsArrayOfResponse(
+            $responseJsonArray
+        );
+        $trackObj = TrackObjectSimplifiedCustom::fromTrackObjectFull(
+            $trackObjs[0]
+        );
         $this->assertInstanceOf(TrackObjectSimplifiedCustom::class, $trackObj);
     }
 
@@ -237,13 +261,17 @@ class ParseSpotifyEntityTest extends TestCase
      * @depends      testJsonDeserializeArtistObjectSimplified
      * @depends      testJsonDeserializeAlbumObjectSimplified
      * @depends      testJsonDeserializeTrackObjectFullEntity
-     * Checks if all the three depending functions work before testing this function.
-     * The "depends" annotations are used only to check if all the depending functions work, which
-     * AlbumObjectSimplified::fromItemArrayOfResponse calls.
+     * Checks if all the three depending functions work before testing this
+     *     function. The "depends" annotations are used only to check if all
+     *     the depending functions work, which
+     *     AlbumObjectSimplified::fromItemArrayOfResponse calls.
      */
-    public function testJsonDeserializeTrackSearchResponse(array $responseJsonArray)
-    {
-        $trackObjs = TrackPagingObject::fromTrackSearchResponse($responseJsonArray);
+    public function testJsonDeserializeTrackSearchResponse(
+        array $responseJsonArray
+    ) {
+        $trackObjs = TrackPagingObject::fromTrackSearchResponse(
+            $responseJsonArray
+        );
         $this->assertInstanceOf(TrackPagingObject::class, $trackObjs);
     }
 
@@ -251,10 +279,15 @@ class ParseSpotifyEntityTest extends TestCase
      * @dataProvider trackPagingObjectProvider
      * @depends      testJsonDeserializeTrackSearchResponse
      */
-    public function testJsonDeserializeTrackPagingObjectSimplified(array $responseJsonArray)
-    {
-        $trackObjs = TrackPagingObject::fromTrackSearchResponse($responseJsonArray);
-        $trackObj = TrackPagingObjectSimplified::fromTrackPagingObjectFull($trackObjs);
+    public function testJsonDeserializeTrackPagingObjectSimplified(
+        array $responseJsonArray
+    ) {
+        $trackObjs = TrackPagingObject::fromTrackSearchResponse(
+            $responseJsonArray
+        );
+        $trackObj = TrackPagingObjectSimplified::fromTrackPagingObjectFull(
+            $trackObjs
+        );
         $this->assertInstanceOf(TrackPagingObjectSimplified::class, $trackObj);
     }
 }

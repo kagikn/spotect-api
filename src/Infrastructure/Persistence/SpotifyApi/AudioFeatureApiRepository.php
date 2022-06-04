@@ -18,12 +18,15 @@ class AudioFeatureApiRepository implements AudioFeatureRepository
     }
 
     /**
-     * @param string $trackId
-     * @param string $accessToken
+     * @param  string  $trackId
+     * @param  string  $accessToken
+     *
      * @return AudioFeaturesObject|ErrorResponse
      */
-    public function getAudioFeature(string $trackId, string $accessToken): AudioFeaturesObject|ErrorResponse
-    {
+    public function getAudioFeature(
+        string $trackId,
+        string $accessToken
+    ): AudioFeaturesObject|ErrorResponse {
         $res = $this->client->get('audio-features/' . $trackId, $accessToken);
 
         $jsonBody = $res->getBody()->getContents();

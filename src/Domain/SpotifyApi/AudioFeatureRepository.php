@@ -10,9 +10,13 @@ use App\Domain\Entities\SpotifyApi\ErrorResponse;
 interface AudioFeatureRepository
 {
     /**
-     * @param string $trackId
-     * @param string $accessToken
+     * @param  string  $trackId
+     * @param  string  $accessToken
+     *
      * @return AudioFeaturesObject|ErrorResponse
      */
-    public function getAudioFeature(string $trackId, string $accessToken): AudioFeaturesObject|ErrorResponse;
+    public function getAudioFeature(
+        string $trackId,
+        string $accessToken
+    ): AudioFeaturesObject|ErrorResponse;
 }

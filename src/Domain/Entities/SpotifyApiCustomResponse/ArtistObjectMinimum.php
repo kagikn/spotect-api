@@ -10,7 +10,8 @@ class ArtistObjectMinimum
     ) {
     }
 
-    public function toAssociativeArray() {
+    public function toAssociativeArray()
+    {
         return [
             'id' => $this->id,
             'name' => $this->name,

@@ -19,17 +19,19 @@ class FetchSpotifyAudioFeatureService
 
     public function __construct(
         SpotifyClientTokenFetchingService $tokenFetchingService,
-        AudioFeatureRepository            $audioFeatureRepository,
-        AudioFeatureCacheRepository       $audioFeatureCacheRepository
-    )
-    {
+        AudioFeatureRepository $audioFeatureRepository,
+        AudioFeatureCacheRepository $audioFeatureCacheRepository
+    ) {
         $this->tokenFetchingService = $tokenFetchingService;
         $this->audioFeatureRepository = $audioFeatureRepository;
         $this->audioFeatureCacheRepository = $audioFeatureCacheRepository;
     }
 
-    public function fetchTrackAudioFeature(Request $request, Response $response, array $args): Response
-    {
+    public function fetchTrackAudioFeature(
+        Request $request,
+        Response $response,
+        array $args
+    ): Response {
         $trackId = $args['id'];
 
         $audioFeaturesObj = $this->audioFeatureCacheRepository->get($trackId);
@@ -40,7 +42,10 @@ class FetchSpotifyAudioFeatureService
             );
 
             if ($tokenOrErrorRes == null) {
-                return (new ErrorResponse(500, 'internal error'))->writeErrorResponse($response);
+                return (new ErrorResponse(
+                    500,
+                    'internal error'
+                ))->writeErrorResponse($response);
             }
 
             $token = $tokenOrErrorRes;
@@ -65,15 +70,18 @@ class FetchSpotifyAudioFeatureService
     }
 
     /**
-     * @param string $trackId
-     * @param string $accessToken
+     * @param  string  $trackId
+     * @param  string  $accessToken
+     *
      * @return AudioFeaturesObject|ErrorResponse
      */
     private function fetchTrackAudioFeatureInternal(
         string $trackId,
         string $accessToken,
-    ): AudioFeaturesObject|ErrorResponse
-    {
-        return $this->audioFeatureRepository->getAudioFeature($trackId, $accessToken);
+    ): AudioFeaturesObject|ErrorResponse {
+        return $this->audioFeatureRepository->getAudioFeature(
+            $trackId,
+            $accessToken
+        );
     }
 }

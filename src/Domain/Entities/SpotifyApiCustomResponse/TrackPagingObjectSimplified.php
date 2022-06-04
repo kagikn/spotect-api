@@ -12,11 +12,10 @@ class TrackPagingObjectSimplified
      * @param int $totalCount
      */
     public function __construct(
-        public readonly array      $items,
+        public readonly array $items,
         public readonly PagingInfo $pagingInfo,
-        public readonly int        $totalCount,
-    )
-    {
+        public readonly int $totalCount,
+    ) {
     }
 
     public static function fromTrackPagingObjectFull(TrackPagingObject $trackPagingObject): TrackPagingObjectSimplified

@@ -12,11 +12,10 @@ class ApiClient
 {
     private GuzzleClient $client;
 
-    public function __construct()
+    public function __construct(GuzzleClient $customClient = null)
     {
-        $this->client = new GuzzleClient(
-            ['base_uri' => 'https://api.spotify.com/v1/']
-        );
+        $this->client = $customClient
+            ?? new GuzzleClient(['base_uri' => 'https://api.spotify.com/v1/']);
     }
 
     public function get(
@@ -44,7 +43,7 @@ class ApiClient
         $parsedArray = json_decode($responseJsonBodyStr, true);
         if ($statusCode < 200 || $statusCode > 299) {
             // assume the error object always exists
-            $error = $this->$parsedArray['error'];
+            $error = $parsedArray['error'];
             return new ErrorResponse($statusCode, $error['message']);
         }
 

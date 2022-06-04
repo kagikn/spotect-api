@@ -21,6 +21,9 @@ class SpotifyAuthApi implements ISpotifyAuthApi
     }
 
     /**
+     * @param  string  $clientId
+     * @param  string  $clientSecret
+     *
      * @return SpotifyGenericCredentials|ErrorResponse
      */
     public function getTokenClientCredentials(

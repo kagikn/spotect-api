@@ -25,6 +25,9 @@ class SpotifyGenericCredentials implements SpotifyCredentials
         return $this->accessToken;
     }
 
+    /**
+     * @return ?string
+     */
     public function getRefreshToken(): ?string
     {
         return null;

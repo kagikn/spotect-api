@@ -42,11 +42,8 @@ class FetchSpotifyAudioFeatureService
                 $_ENV['SPOTIFY_CLIENT_SECRET'],
             );
 
-            if ($credentialOrErrorRes == null) {
-                return (new ErrorResponse(
-                    500,
-                    'internal error'
-                ))->writeErrorResponse($response);
+            if ($credentialOrErrorRes instanceof ErrorResponse) {
+                return $credentialOrErrorRes->writeErrorResponse($response);
             }
 
             $newAudioFeaturesObj = $this->fetchTrackAudioFeatureInternal(

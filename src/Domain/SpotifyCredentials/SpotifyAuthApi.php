@@ -31,13 +31,15 @@ class SpotifyAuthApi implements ISpotifyAuthApi
         string $clientSecret
     ): SpotifyGenericCredentials|ErrorResponse {
         $res = $this->tryFetchToken($clientId, $clientSecret);
+        if ($res instanceof ErrorResponse) {
+            return $res;
+        }
 
         $json = json_decode($res->getBody()->getContents(), true);
 
         if ($res->getStatusCode() != 200) {
             $error = $json['error'];
             $errorMsg = is_string($error) ? $error : 'server_error';
-
             return new ErrorResponse(500, $errorMsg);
         }
 
@@ -50,7 +52,7 @@ class SpotifyAuthApi implements ISpotifyAuthApi
     private function tryFetchToken(
         string $clientId,
         string $clientSecret
-    ): ?ResponseInterface {
+    ): ResponseInterface|ErrorResponse {
         $authStr = 'Basic ' . base64_encode($clientId . ':' . $clientSecret);
         try {
             return $this->guzzleClient->post('', [
@@ -62,8 +64,9 @@ class SpotifyAuthApi implements ISpotifyAuthApi
                 ],
                 'http_errors' => false,
             ]);
-        } catch (\GuzzleHttp\Exception\GuzzleException) {
-            return null;
+        } catch (GuzzleException) {
+            $errorMessage = 'Could not connect to Spotify API for auth tokens.';
+            return new ErrorResponse(0, $errorMessage);
         }
     }
 }

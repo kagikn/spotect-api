@@ -41,11 +41,8 @@ class SearchSpotifyService
             $_ENV['SPOTIFY_CLIENT_SECRET'],
         );
 
-        if ($tokenOrErrorRes == null) {
-            return (new ErrorResponse(
-                500,
-                'internal error'
-            ))->writeErrorResponse($response);
+        if ($tokenOrErrorRes instanceof ErrorResponse) {
+            return $tokenOrErrorRes->writeErrorResponse($response);
         }
 
         $token = $tokenOrErrorRes;
@@ -56,11 +53,9 @@ class SearchSpotifyService
             $acceptLanguage[0] ?? '',
         );
 
-
         if ($trackPagingObjOrError instanceof ErrorResponse) {
             return $trackPagingObjOrError->writeErrorResponse($response);
         }
-
 
         $trackPagingObjSimplified = TrackPagingObjectSimplified::fromTrackPagingObjectFull(
             $trackPagingObjOrError

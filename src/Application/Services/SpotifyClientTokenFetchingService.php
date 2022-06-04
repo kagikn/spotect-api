@@ -31,13 +31,13 @@ class SpotifyClientTokenFetchingService
      * @param  string  $clientSecret
      * @param  int|null  $refreshOffsetTimeBeforeTimeout
      *
-     * @return ?SpotifyCredentials
+     * @return SpotifyCredentials|ErrorResponse
      */
     public function fetch(
         string $clientId,
         string $clientSecret,
         ?int $refreshOffsetTimeBeforeTimeout = 300
-    ): ?SpotifyCredentials {
+    ): SpotifyCredentials|ErrorResponse {
         $timeoutUnixTimestamp = time() + $refreshOffsetTimeBeforeTimeout;
 
         $cachedToken = $this->credentialsRepository->get();
@@ -58,7 +58,7 @@ class SpotifyClientTokenFetchingService
                 'Could not fetch client access token.' .
                 'The client ID or client secret are wrong or Auth API of Spotify is down.'
             );
-            return null;
+            return $tokenOrErrorRes;
         }
 
         $token = $tokenOrErrorRes;

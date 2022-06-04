@@ -7,7 +7,6 @@ namespace App\Infrastructure\Persistence\SpotifyApi;
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\SpotifyApi\SearchRepository;
-use GuzzleHttp\Exception\GuzzleException;
 
 class SearchApiRepository implements SearchRepository
 {
@@ -24,7 +23,6 @@ class SearchApiRepository implements SearchRepository
      * @param ?string  $acceptLanguageHeader
      *
      * @return TrackPagingObject|ErrorResponse
-     * @throws GuzzleException
      */
     public function searchForTrack(
         array $queryParams,
@@ -38,19 +36,12 @@ class SearchApiRepository implements SearchRepository
             $acceptLanguageHeader
         );
 
-        $jsonBody = $res->getBody()->getContents();
-        $statusCode = $res->getStatusCode();
-
-        if ($statusCode != 200) {
-            $jsonArray = json_decode($jsonBody, true);
-            $error = $jsonArray['error'];
-            return new ErrorResponse($statusCode, $error['message']);
+        if ($res instanceof ErrorResponse) {
+            return $res;
         }
 
-        $searchResultJson = json_decode($jsonBody, true);
-
         return TrackPagingObject::fromTrackSearchResponse(
-            $searchResultJson['tracks']
+            $res['tracks']
         );
     }
 }

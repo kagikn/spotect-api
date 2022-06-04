@@ -59,7 +59,7 @@ class SpotifyAuthApi implements ISpotifyAuthApi
                 ],
                 'http_errors' => false,
             ]);
-        } catch (\GuzzleHttp\Exception\GuzzleException $ex) {
+        } catch (\GuzzleHttp\Exception\GuzzleException) {
             return null;
         }
     }

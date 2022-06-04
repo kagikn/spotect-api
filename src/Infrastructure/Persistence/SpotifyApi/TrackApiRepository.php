@@ -38,16 +38,10 @@ class TrackApiRepository implements TrackRepository
             $acceptLanguageHeader,
         );
 
-        $jsonArray = json_decode($res->getBody()->getContents(), true);
-        $statusCode = $res->getStatusCode();
-
-        if ($statusCode != 200) {
-            $error = $jsonArray['error'];
-            return new ErrorResponse($error['status'], $error['message']);
+        if ($res instanceof ErrorResponse) {
+            return $res;
         }
 
-        $searchResultJson = $jsonArray;
-
-        return TrackObjectFullEntity::fromTrackObjItemArray($searchResultJson);
+        return TrackObjectFullEntity::fromTrackObjItemArray($res);
     }
 }

@@ -29,15 +29,10 @@ class AudioFeatureApiRepository implements AudioFeatureRepository
     ): AudioFeaturesObject|ErrorResponse {
         $res = $this->client->get('audio-features/' . $trackId, $accessToken);
 
-        $jsonBody = $res->getBody()->getContents();
-        $statusCode = $res->getStatusCode();
-
-        if ($statusCode != 200) {
-            $jsonArray = json_decode($jsonBody, true);
-            $error = $jsonArray['error'];
-            return new ErrorResponse($statusCode, $error['message']);
+        if ($res instanceof ErrorResponse) {
+            return $res;
         }
 
-        return AudioFeaturesObject::fromJson($jsonBody);
+        return AudioFeaturesObject::fromItemArray($res);
     }
 }

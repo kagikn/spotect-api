@@ -45,6 +45,7 @@ class SearchApiRepository implements SearchRepository
         }
 
         $searchResultJson = json_decode($jsonBody, true);
-        return SearchResponseParser::parseTrackSearchResponse($searchResultJson);
+
+        return TrackPagingObject::fromTrackSearchResponse($searchResultJson['tracks']);
     }
 }

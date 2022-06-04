@@ -55,32 +55,6 @@ class TrackApiRepository implements TrackRepository
 
         $searchResultJson = $jsonArray;
 
-        $albumObjSimplified = SearchResponseParser::parseAlbumObjectSimplified($searchResultJson['album']);
-        $artistObjSimplifiedArray =
-            SearchResponseParser::parseArtistObjectSimplifiedArray($searchResultJson['artists']);
-        $restrictionObj = isset($searchResultJson['restrictions'])
-            ? new RestrictionsObject($searchResultJson['restrictions']['reason'])
-            : null;
-        return new TrackObjectFullEntity(
-            id: $searchResultJson['id'],
-            album: $albumObjSimplified,
-            artists: $artistObjSimplifiedArray,
-            discNumber: $searchResultJson['disc_number'],
-            durationMs: $searchResultJson['duration_ms'],
-            explicit: $searchResultJson['explicit'],
-            externalIds: $searchResultJson['external_ids'],
-            externalUrls: $searchResultJson['external_urls'],
-            href: $searchResultJson['href'],
-            name: $searchResultJson['name'],
-            popularity: $searchResultJson['popularity'],
-            trackNumber: $searchResultJson['track_number'],
-            uri: $searchResultJson['uri'],
-            availableMarkets: $searchResultJson['available_markets'] ?? null,
-            isLocal: $searchResultJson['is_local'] ?? false,
-            isPlayable: $searchResultJson['is_playable'] ?? false,
-            linkedFrom: $searchResultJson['linked_from'] ?? null,
-            previewUrl: $searchResultJson['preview_url'] ?? null,
-            restrictions: $restrictionObj ?? null,
-        );
+        return TrackObjectFullEntity::fromTrackObjItemArray($searchResultJson);
     }
 }

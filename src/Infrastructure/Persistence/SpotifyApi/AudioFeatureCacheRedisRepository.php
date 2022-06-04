@@ -34,20 +34,21 @@ class AudioFeatureCacheRedisRepository implements AudioFeatureCacheRepository
 
         $baseKey = self::SPOTIFY_AUDIO_FEATURE_KEY_NAME
             . $audioFeaturesObject->id;
-
         if ($redis->exists($baseKey)) {
             return false;
         }
 
-        $redis->multi();
-        $redis->hSet(
-            $baseKey,
-            'values',
-            $audioFeaturesObject->valuesToJson(),
-        );
-        $redis->expireAt($baseKey, time() + $expireForIfAdded);
-        $redis->exec();
+        if (
+            !$redis->hSet(
+                $baseKey,
+                'values',
+                $audioFeaturesObject->valuesToJson(),
+            )
+        ) {
+            return false;
+        }
 
+        $redis->expireAt($baseKey, time() + $expireForIfAdded);
         return true;
     }
 

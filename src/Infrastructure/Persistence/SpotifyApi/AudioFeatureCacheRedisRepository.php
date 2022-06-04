@@ -10,17 +10,16 @@ use Redis;
 class AudioFeatureCacheRedisRepository implements AudioFeatureCacheRepository
 {
     private const SPOTIFY_AUDIO_FEATURE_KEY_NAME = 'spotify:audio-feature:';
-    private const CREATED_AT_KEY_STR = 'created_at';
 
     /**
      * @param  AudioFeaturesObject  $audioFeaturesObject
-     * @param  int  $expireFor
+     * @param  int  $expireForIfAdded
      *
      * @return bool
      */
     public function store(
         AudioFeaturesObject $audioFeaturesObject,
-        int $expireFor = 604800
+        int $expireForIfAdded = 604800
     ): bool {
         $redis = new Redis();
         if (
@@ -37,33 +36,23 @@ class AudioFeatureCacheRedisRepository implements AudioFeatureCacheRepository
             . $audioFeaturesObject->id;
 
         if ($redis->exists($baseKey)) {
-            $redis->multi();
-            $redis->hSet(
-                $baseKey,
-                'values',
-                $audioFeaturesObject->valuesToJson(),
-            );
-        } else {
-            $redis->multi();
-            $redis->hMSet(
-                $baseKey,
-                [
-                    'values' => $audioFeaturesObject->valuesToJson(),
-                    self::CREATED_AT_KEY_STR => strval(time())
-                ]
-            );
+            return false;
         }
-        $redis->expire($baseKey, $expireFor);
+
+        $redis->multi();
+        $redis->hSet(
+            $baseKey,
+            'values',
+            $audioFeaturesObject->valuesToJson(),
+        );
+        $redis->expireAt($baseKey, time() + $expireForIfAdded);
         $redis->exec();
 
         return true;
     }
 
-    public function get(
-        string $id,
-        int $expireFor = 604800,
-        int $expireForMax = 2592000
-    ): ?AudioFeaturesObject {
+    public function get(string $id): ?AudioFeaturesObject
+    {
         $redis = new Redis();
         if (
             !$redis->pconnect(
@@ -76,20 +65,12 @@ class AudioFeatureCacheRedisRepository implements AudioFeatureCacheRepository
         }
 
         $baseKey = self::SPOTIFY_AUDIO_FEATURE_KEY_NAME . $id;
-        if (!$redis->exists($baseKey)) {
-            return null;
-        }
-        $createdAtVal = intval(
-            $redis->hGet($baseKey, self::CREATED_AT_KEY_STR)
-        );
-        if ($createdAtVal + $expireForMax < time()) {
-            $redis->del($baseKey);
+        $jsonStrOrFalse = $redis->hGet($baseKey, 'values');
+
+        if (!$jsonStrOrFalse) {
             return null;
         }
 
-        $jsonStr = $redis->hGet($baseKey, 'values');
-        $redis->expire($baseKey, $expireFor);
-
-        return AudioFeaturesObject::fromValueJsonAndId($id, $jsonStr);
+        return AudioFeaturesObject::fromValueJsonAndId($id, $jsonStrOrFalse);
     }
 }

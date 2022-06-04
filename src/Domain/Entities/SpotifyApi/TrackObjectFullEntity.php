@@ -46,42 +46,47 @@ class TrackObjectFullEntity extends TrackObjectSimplified
     }
 
     /**
-     * @param array $items
+     * @param array $trackObjs
      * @return TrackObjectFullEntity[]
      */
-    public static function fromItemsArrayOfResponse(array $items): array
+    public static function fromItemsArrayOfResponse(array $trackObjs): array
     {
-        $array_map = [];
-        foreach ($items as $key => $item) {
-            $albumObjSimplified =
-                AlbumObjectSimplified::fromItemArrayOfResponse($item['album']);
-            $artistObjSimplifiedArray =
-                ArtistObjectSimplified::fromArtistsItemsArrayOfResponse($item['artists']);
-            $restrictionObj = isset($item['restrictions'])
-                ? new RestrictionsObject($item['restrictions']['reason'])
-                : null;
-            $array_map[$key] = new TrackObjectFullEntity(
-                id: $item['id'],
-                album: $albumObjSimplified,
-                artists: $artistObjSimplifiedArray,
-                discNumber: $item['disc_number'],
-                durationMs: $item['duration_ms'],
-                explicit: $item['explicit'],
-                externalIds: $item['external_ids'],
-                externalUrls: $item['external_urls'],
-                href: $item['href'],
-                name: $item['name'],
-                popularity: $item['popularity'],
-                trackNumber: $item['track_number'],
-                uri: $item['uri'],
-                availableMarkets: $item['available_markets'] ?? null,
-                isLocal: $item['is_local'] ?? false,
-                isPlayable: $item['is_playable'] ?? false,
-                linkedFrom: $item['linked_from'] ?? null,
-                previewUrl: $item['preview_url'] ?? null,
-                restrictions: $restrictionObj ?? null,
-            );
-        }
-        return $array_map;
+        return array_map(fn($trackObj) => self::fromTrackObjItemArray($trackObj), $trackObjs);
+    }
+
+    /**
+     * @param array $trackObj
+     * @return TrackObjectFullEntity
+     */
+    public static function fromTrackObjItemArray(array $trackObj): TrackObjectFullEntity
+    {
+        $albumObjSimplified =
+            AlbumObjectSimplified::fromItemArrayOfResponse($trackObj['album']);
+        $artistObjSimplifiedArray =
+            ArtistObjectSimplified::fromArtistsItemsArrayOfResponse($trackObj['artists']);
+        $restrictionObj = isset($trackObj['restrictions'])
+            ? new RestrictionsObject($trackObj['restrictions']['reason'])
+            : null;
+        return new TrackObjectFullEntity(
+            id: $trackObj['id'],
+            album: $albumObjSimplified,
+            artists: $artistObjSimplifiedArray,
+            discNumber: $trackObj['disc_number'],
+            durationMs: $trackObj['duration_ms'],
+            explicit: $trackObj['explicit'],
+            externalIds: $trackObj['external_ids'],
+            externalUrls: $trackObj['external_urls'],
+            href: $trackObj['href'],
+            name: $trackObj['name'],
+            popularity: $trackObj['popularity'],
+            trackNumber: $trackObj['track_number'],
+            uri: $trackObj['uri'],
+            availableMarkets: $trackObj['available_markets'] ?? null,
+            isLocal: $trackObj['is_local'] ?? false,
+            isPlayable: $trackObj['is_playable'] ?? false,
+            linkedFrom: $trackObj['linked_from'] ?? null,
+            previewUrl: $trackObj['preview_url'] ?? null,
+            restrictions: $restrictionObj ?? null,
+        );
     }
 }

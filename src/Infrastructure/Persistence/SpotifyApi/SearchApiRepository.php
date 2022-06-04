@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\SpotifyApi;
 
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
-use App\Domain\Entities\SpotifyApi\SearchResponseParser;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\SpotifyApi\SearchRepository;
-use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
 
 class SearchApiRepository implements SearchRepository

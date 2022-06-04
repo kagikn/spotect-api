@@ -8,7 +8,6 @@ use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\SpotifyCredentials\ISpotifyAuthApi;
 use App\Domain\SpotifyCredentials\SpotifyCredentials;
 use App\Domain\SpotifyCredentials\SpotifyCredentialsRepository;
-use Exception;
 use Psr\Log\LoggerInterface;
 
 class SpotifyClientTokenFetchingService

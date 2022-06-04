@@ -6,7 +6,6 @@ namespace App\Domain\SpotifyApi;
 
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\Entities\SpotifyApi\TrackObjectFullEntity;
-use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 
 interface TrackRepository
 {

@@ -4,21 +4,13 @@ declare(strict_types=1);
 
 namespace App\Application\Services;
 
-use _PHPStan_3e014c27f\Nette\Neon\Exception;
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
-use App\Domain\Entities\SpotifyApi\SearchResponseParser;
 use App\Domain\Entities\SpotifyApi\TrackObjectFullEntity;
-use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\Entities\SpotifyApiCustomResponse\TrackObjectSimplifiedCustom;
-use App\Domain\SpotifyApi\SearchRepository;
 use App\Domain\SpotifyApi\TrackRepository;
 use App\Infrastructure\Persistence\GeoIP\GeoIPDetectorInterface;
-use App\Infrastructure\Persistence\SpotifyApi\SearchApiRepository;
-use GeoIp2\Exception\AddressNotFoundException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-use GuzzleHttp\Client as GuzzleClient;
-use GeoIp2\Database\Reader;
 
 class GetSpotifyTrackService
 {

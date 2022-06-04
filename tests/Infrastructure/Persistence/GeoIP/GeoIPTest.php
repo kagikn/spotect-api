@@ -7,7 +7,6 @@ namespace Tests\Infrastructure\Persistence\GeoIP;
 use App\Infrastructure\Persistence\GeoIP\GeoIPDetector;
 use App\Infrastructure\Persistence\GeoIP\GeoIPDetectorInterface;
 use GeoIp2\Database\Reader;
-use GeoIp2\Exception\AddressNotFoundException;
 use MaxMind\Db\Reader\InvalidDatabaseException;
 use Tests\TestCase;
 

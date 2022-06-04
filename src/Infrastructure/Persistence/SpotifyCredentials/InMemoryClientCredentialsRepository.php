@@ -7,7 +7,6 @@ namespace App\Infrastructure\Persistence\SpotifyCredentials;
 use App\Domain\SpotifyCredentials\SpotifyCredentials;
 use App\Domain\SpotifyCredentials\SpotifyCredentialsRepository;
 use App\Domain\SpotifyCredentials\SpotifyGenericCredentials;
-use PDO;
 
 class InMemoryClientCredentialsRepository implements SpotifyCredentialsRepository
 {

@@ -6,16 +6,10 @@ namespace App\Application\Services;
 
 use App\Domain\Entities\SpotifyApi\AudioFeaturesObject;
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
-use App\Domain\Entities\SpotifyApi\SearchResponseParser;
-use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\SpotifyApi\AudioFeatureRepository;
-use App\Infrastructure\Persistence\SpotifyApi\AudioFeatureCacheRedisRepository;
 use App\Infrastructure\Persistence\SpotifyApi\AudioFeatureCacheRepository;
-use GeoIp2\Exception\AddressNotFoundException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-use GuzzleHttp\Client as GuzzleClient;
-use GeoIp2\Database\Reader;
 
 class FetchSpotifyAudioFeatureService
 {

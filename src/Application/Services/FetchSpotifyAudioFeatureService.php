@@ -7,6 +7,7 @@ namespace App\Application\Services;
 use App\Domain\Entities\SpotifyApi\AudioFeaturesObject;
 use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\SpotifyApi\AudioFeatureRepository;
+use App\Domain\SpotifyCredentials\SpotifyCredentials;
 use App\Infrastructure\Persistence\SpotifyApi\AudioFeatureCacheRepository;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -36,31 +37,29 @@ class FetchSpotifyAudioFeatureService
 
         $audioFeaturesObj = $this->audioFeatureCacheRepository->get($trackId);
         if (!isset($audioFeaturesObj)) {
-            $tokenOrErrorRes = $this->tokenFetchingService->fetch(
+            $credentialOrErrorRes = $this->tokenFetchingService->fetch(
                 $_ENV['SPOTIFY_CLIENT_ID'],
                 $_ENV['SPOTIFY_CLIENT_SECRET'],
             );
 
-            if ($tokenOrErrorRes == null) {
+            if ($credentialOrErrorRes == null) {
                 return (new ErrorResponse(
                     500,
                     'internal error'
                 ))->writeErrorResponse($response);
             }
 
-            $token = $tokenOrErrorRes;
-
-            $audioFeaturesObjOrError = $this->fetchTrackAudioFeatureInternal(
-                $args['id'],
-                $token->getAccessToken(),
+            $newAudioFeaturesObj = $this->fetchTrackAudioFeatureInternal(
+                $trackId,
+                $credentialOrErrorRes->getAccessToken(),
             );
 
-            if ($audioFeaturesObjOrError instanceof ErrorResponse) {
-                return $audioFeaturesObjOrError->writeErrorResponse($response);
+            if ($newAudioFeaturesObj instanceof ErrorResponse) {
+                return $newAudioFeaturesObj->writeErrorResponse($response);
             }
 
-            $this->audioFeatureCacheRepository->store($audioFeaturesObjOrError);
-            $audioFeaturesObj = $audioFeaturesObjOrError;
+            $this->audioFeatureCacheRepository->store($newAudioFeaturesObj);
+            $audioFeaturesObj = $newAudioFeaturesObj;
         }
 
         $response = $response->withHeader('Content-Type', 'application/json');

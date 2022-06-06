@@ -71,9 +71,18 @@ class TrackObjectFullEntity extends TrackObjectSimplified
         $artistObjSimplified = ArtistObjectSimplified::fromItemCollectionArray(
             $trackObj['artists']
         );
+        $trackLinkObj = isset($trackObj['linked_from'])
+            ? new TrackLinkObject(
+                $trackObj['linked_from']['id'],
+                $trackObj['linked_from']['external_urls'],
+                $trackObj['linked_from']['href'],
+                $trackObj['linked_from']['uri'],
+            )
+            : null;
         $restrictionObj = isset($trackObj['restrictions'])
             ? new RestrictionsObject($trackObj['restrictions']['reason'])
             : null;
+
         return new TrackObjectFullEntity(
             id: $trackObj['id'],
             album: $albumObjSimplified,
@@ -91,7 +100,7 @@ class TrackObjectFullEntity extends TrackObjectSimplified
             availableMarkets: $trackObj['available_markets'] ?? null,
             isLocal: $trackObj['is_local'] ?? false,
             isPlayable: $trackObj['is_playable'] ?? false,
-            linkedFrom: $trackObj['linked_from'] ?? null,
+            linkedFrom: $trackLinkObj ?? null,
             previewUrl: $trackObj['preview_url'] ?? null,
             restrictions: $restrictionObj ?? null,
         );

@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Application\Actions;
+namespace Tests\Infrastructure\Persistence\SpotifyApi;
 
 use App\Application\Services\SpotifyClientTokenFetchingService;
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
+use App\Exception\SpotifyApi\BadOAuthRequestException;
+use App\Exception\SpotifyApi\BadRequestParameterException;
+use App\Exception\SpotifyApi\InvalidTokenException;
+use App\Exception\SpotifyApi\RateLimitExceededException;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use App\Domain\SpotifyCredentials\SpotifyAuthApi;
 use App\Infrastructure\Persistence\SpotifyApi\ApiClient;
 use App\Infrastructure\Persistence\SpotifyCredentials\InMemoryClientCredentialsRepository;
@@ -37,13 +41,61 @@ class ApiClientTest extends TestCase
         ];
     }
 
-    public function guzzleClientProviderForErrorResponse(): array
+    public function guzzleClientProviderFor400Response(): array
     {
         $mock = new MockHandler([
             new Response(
                 400,
                 ['Content-Type' => 'application/json'],
                 '{"error":{"status":400,"message":"Missing parameter type"}}'
+            ),
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+
+        return [
+            [new ApiClient(new Client(['handler' => $handlerStack]))]
+        ];
+    }
+
+    public function guzzleClientProviderFor401Response(): array
+    {
+        $mock = new MockHandler([
+            new Response(
+                401,
+                ['Content-Type' => 'application/json'],
+                '{"error":{"status":401,"message":"The access token expired"}}'
+            ),
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+
+        return [
+            [new ApiClient(new Client(['handler' => $handlerStack]))]
+        ];
+    }
+
+    public function guzzleClientProviderFor403Response(): array
+    {
+        $mock = new MockHandler([
+            new Response(
+                403,
+                ['Content-Type' => 'application/json'],
+                '{"error":{"status":403,"message":"Invalid oauth request"}}'
+            ),
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+
+        return [
+            [new ApiClient(new Client(['handler' => $handlerStack]))]
+        ];
+    }
+
+    public function guzzleClientProviderFor429Response(): array
+    {
+        $mock = new MockHandler([
+            new Response(
+                429,
+                ['Content-Type' => 'application/json'],
+                '{"error":{"status":429,"message":"Exceeded API limit request"}}'
             ),
         ]);
         $handlerStack = HandlerStack::create($mock);
@@ -75,14 +127,58 @@ class ApiClientTest extends TestCase
     }
 
     /**
-     * @dataProvider guzzleClientProviderForErrorResponse
+     * @dataProvider guzzleClientProviderFor400Response
      */
-    public function testBadRequestErrorResponse(ApiClient $client)
-    {
-        $errorRes = $client->get('audio-feature', '');
-        $this->assertInstanceOf(ErrorResponse::class, $errorRes);
-        $httpStatus = $errorRes->httpStatus;
-        $this->assertTrue($httpStatus < 200 || $httpStatus > 299);
+    public function testThrowBadRequestParameterExceptionFor400Response(
+        ApiClient $client
+    ) {
+        $this->expectException(BadRequestParameterException::class);
+        $client->get('audio-feature', '');
+    }
+
+    /**
+     * @dataProvider guzzleClientProviderFor401Response
+     */
+    public function testThrowInvalidTokenExceptionFor401Response(
+        ApiClient $client
+    ) {
+        $this->expectException(InvalidTokenException::class);
+        $client->get('audio-feature', '');
+    }
+
+    /**
+     * @dataProvider guzzleClientProviderFor403Response
+     */
+    public function testThrowBadOAuthRequestExceptionFor403Response(
+        ApiClient $client
+    ) {
+        $this->expectException(BadOAuthRequestException::class);
+        $client->get('audio-feature', '');
+    }
+
+    /**
+     * @dataProvider guzzleClientProviderFor429Response
+     */
+    public function testThrowRateLimitExceededExceptionFor429Response(
+        ApiClient $client
+    ) {
+        $this->expectException(RateLimitExceededException::class);
+        $client->get('audio-feature', '');
+    }
+
+    /**
+     * @dataProvider guzzleClientProviderFor400Response
+     */
+    public function testApiMessageAndEndpointUriOfSpotifyApiErrorResponse(
+        ApiClient $client
+    ) {
+        try {
+            $client->get('audio-feature', '');
+            $this->fail();
+        } catch (SpotifyApiException $ex) {
+            $this->assertSame('Missing parameter type', $ex->getApiMessage());
+            $this->assertSame('audio-feature', $ex->getEndpointUri());
+        }
     }
 
     /**
@@ -90,8 +186,7 @@ class ApiClientTest extends TestCase
      */
     public function testNetworkErrorResponse(ApiClient $client)
     {
-        $errorRes = $client->get('audio-feature', '');
-        $this->assertInstanceOf(ErrorResponse::class, $errorRes);
-        $this->assertEquals(0, $errorRes->httpStatus);
+        $this->expectException(ConnectException::class);
+        $client->get('audio-feature', '');
     }
 }

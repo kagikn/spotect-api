@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Application\Services;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\Entities\SpotifyApiCustomResponse\TrackPagingObjectSimplified;
 use App\Domain\SpotifyApi\SearchRepository;
@@ -41,10 +40,6 @@ class SearchSpotifyService
             $_ENV['SPOTIFY_CLIENT_SECRET'],
         );
 
-        if ($tokenOrErrorRes instanceof ErrorResponse) {
-            return $tokenOrErrorRes->writeErrorResponse($response);
-        }
-
         $token = $tokenOrErrorRes;
 
         $trackPagingObjOrError = $this->searchInternal(
@@ -52,10 +47,6 @@ class SearchSpotifyService
             $token->getAccessToken(),
             $acceptLanguage[0] ?? '',
         );
-
-        if ($trackPagingObjOrError instanceof ErrorResponse) {
-            return $trackPagingObjOrError->writeErrorResponse($response);
-        }
 
         $trackPagingObjSimplified = TrackPagingObjectSimplified::fromTrackPagingObjectFull(
             $trackPagingObjOrError
@@ -76,13 +67,13 @@ class SearchSpotifyService
      * @param  string  $token
      * @param ?string  $acceptLanguage
      *
-     * @return TrackPagingObject|ErrorResponse
+     * @return TrackPagingObject
      */
     private function searchInternal(
         array $queries,
         string $token,
         ?string $acceptLanguage = null,
-    ): TrackPagingObject|ErrorResponse {
+    ): TrackPagingObject {
         if (!isset($queries['market'])) {
             $queries['market'] = $this->iPDetector->detectCountry('JP');
         }

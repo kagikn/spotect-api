@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\SpotifyApi;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\Entities\SpotifyApi\TrackObjectFullEntity;
 use App\Domain\SpotifyApi\TrackRepository;
+use App\Exception\SpotifyApi\SpotifyApiException;
+use GuzzleHttp\Exception\GuzzleException;
 
 class TrackApiRepository implements TrackRepository
 {
@@ -23,25 +24,22 @@ class TrackApiRepository implements TrackRepository
      * @param ?string  $market
      * @param ?string  $acceptLanguageHeader
      *
-     * @return TrackObjectFullEntity|ErrorResponse
+     * @return TrackObjectFullEntity
+     * @throws SpotifyApiException
+     * @throws GuzzleException
      */
     public function getTrackInfo(
         string $trackId,
         string $accessToken,
         string $market = null,
         string $acceptLanguageHeader = null
-    ): TrackObjectFullEntity|ErrorResponse {
+    ): TrackObjectFullEntity {
         $res = $this->client->get(
             'tracks/' . $trackId,
             $accessToken,
             $market,
             $acceptLanguageHeader,
         );
-
-        if ($res instanceof ErrorResponse) {
-            return $res;
-        }
-
         return TrackObjectFullEntity::fromTrackObjItemArray($res);
     }
 }

@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\SpotifyApi;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
+use App\Exception\SpotifyApi\BadOAuthRequestException;
+use App\Exception\SpotifyApi\BadRequestParameterException;
+use App\Exception\SpotifyApi\InvalidTokenException;
+use App\Exception\SpotifyApi\RateLimitExceededException;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\ServerException;
+use Slim\Exception\HttpException;
 
 class ApiClient
 {
@@ -18,36 +24,61 @@ class ApiClient
             ?? new GuzzleClient(['base_uri' => 'https://api.spotify.com/v1/']);
     }
 
+    /**
+     * @param  string  $endpoint
+     * @param  string  $accessToken
+     * @param  array|string|null  $query
+     * @param  string|null  $acceptLanguageHeader
+     *
+     * @return array
+     * @throws SpotifyApiException
+     * @throws GuzzleException
+     */
     public function get(
         string $endpoint,
         string $accessToken,
         array|string $query = null,
         string $acceptLanguageHeader = null
-    ): array|ErrorResponse {
+    ): array {
         $configArray = $this->formatRequestConfigArray(
             $accessToken,
             $query,
             $acceptLanguageHeader
         );
-
         try {
             $response = $this->client->get($endpoint, $configArray);
-        } catch (GuzzleException) {
-            $errorMessage = 'Could not connect to Spotify API.';
-            return new ErrorResponse(0, $errorMessage);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $responseBody = $e->getResponse()->getBody()->getContents();
+            $jsonBody = json_decode($responseBody, true);
+            $apiMessage = $jsonBody['error']['message'];
+
+            throw match ($e->getCode()) {
+                400 => new BadRequestParameterException(
+                    $endpoint,
+                    $apiMessage,
+                    $query
+                ),
+                401 => new InvalidTokenException(
+                    $endpoint,
+                    $apiMessage,
+                    $query
+                ),
+                403 => new BadOAuthRequestException(
+                    $endpoint,
+                    $apiMessage,
+                    $query
+                ),
+                429 => new RateLimitExceededException(
+                    $endpoint,
+                    $apiMessage,
+                    $query
+                ),
+                default => $e,
+            };
         }
 
-        $statusCode = $response->getStatusCode();
         $responseJsonBodyStr = $response->getBody()->getContents();
-
-        $parsedArray = json_decode($responseJsonBodyStr, true);
-        if ($statusCode < 200 || $statusCode > 299) {
-            // assume the error object always exists
-            $error = $parsedArray['error'];
-            return new ErrorResponse($statusCode, $error['message']);
-        }
-
-        return $parsedArray;
+        return json_decode($responseJsonBodyStr, true);
     }
 
     private function formatRequestConfigArray(
@@ -66,7 +97,6 @@ class ApiClient
 
         $configArray = [
             'headers' => $headers,
-            'http_errors' => false,
         ];
 
         if (isset($query)) {

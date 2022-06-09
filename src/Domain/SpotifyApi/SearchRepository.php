@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\SpotifyApi;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 
 interface SearchRepository
@@ -14,11 +13,11 @@ interface SearchRepository
      * @param  string  $accessToken
      * @param ?string  $acceptLanguageHeader
      *
-     * @return TrackPagingObject|ErrorResponse
+     * @return TrackPagingObject
      */
     public function searchForTrack(
         array $queryParams,
         string $accessToken,
         string $acceptLanguageHeader = null
-    ): TrackPagingObject|ErrorResponse;
+    ): TrackPagingObject;
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\SpotifyCredentials;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 
 class SpotifyAuthApi implements ISpotifyAuthApi
@@ -24,25 +24,14 @@ class SpotifyAuthApi implements ISpotifyAuthApi
      * @param  string  $clientId
      * @param  string  $clientSecret
      *
-     * @return SpotifyGenericCredentials|ErrorResponse
+     * @return SpotifyGenericCredentials
      */
     public function getTokenClientCredentials(
         string $clientId,
         string $clientSecret
-    ): SpotifyGenericCredentials|ErrorResponse {
+    ): SpotifyGenericCredentials {
         $res = $this->tryFetchToken($clientId, $clientSecret);
-        if ($res instanceof ErrorResponse) {
-            return $res;
-        }
-
         $json = json_decode($res->getBody()->getContents(), true);
-
-        if ($res->getStatusCode() != 200) {
-            $error = $json['error'];
-            $errorMsg = is_string($error) ? $error : 'server_error';
-            return new ErrorResponse(500, $errorMsg);
-        }
-
         return new SpotifyGenericCredentials(
             $json['access_token'],
             $json['expires_in'] + time()
@@ -52,21 +41,15 @@ class SpotifyAuthApi implements ISpotifyAuthApi
     private function tryFetchToken(
         string $clientId,
         string $clientSecret
-    ): ResponseInterface|ErrorResponse {
+    ): ResponseInterface {
         $authStr = 'Basic ' . base64_encode($clientId . ':' . $clientSecret);
-        try {
-            return $this->guzzleClient->post('', [
-                'headers' => [
-                    'Authorization' => $authStr
-                ],
-                'form_params' => [
-                    'grant_type' => 'client_credentials'
-                ],
-                'http_errors' => false,
-            ]);
-        } catch (GuzzleException) {
-            $errorMessage = 'Could not connect to Spotify API for auth tokens.';
-            return new ErrorResponse(0, $errorMessage);
-        }
+        return $this->guzzleClient->post('', [
+            'headers' => [
+                'Authorization' => $authStr
+            ],
+            'form_params' => [
+                'grant_type' => 'client_credentials'
+            ],
+        ]);
     }
 }

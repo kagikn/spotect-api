@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\SpotifyApi;
 
 use App\Domain\Entities\SpotifyApi\AudioFeaturesObject;
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use App\Domain\SpotifyApi\AudioFeatureRepository;
+use GuzzleHttp\Exception\GuzzleException;
 
 class AudioFeatureApiRepository implements AudioFeatureRepository
 {
@@ -21,18 +22,15 @@ class AudioFeatureApiRepository implements AudioFeatureRepository
      * @param  string  $trackId
      * @param  string  $accessToken
      *
-     * @return AudioFeaturesObject|ErrorResponse
+     * @return AudioFeaturesObject
+     * @throws SpotifyApiException
+     * @throws GuzzleException
      */
     public function getAudioFeature(
         string $trackId,
         string $accessToken
-    ): AudioFeaturesObject|ErrorResponse {
+    ): AudioFeaturesObject {
         $res = $this->client->get('audio-features/' . $trackId, $accessToken);
-
-        if ($res instanceof ErrorResponse) {
-            return $res;
-        }
-
         return AudioFeaturesObject::fromItemArray($res);
     }
 }

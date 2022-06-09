@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests\Application\Actions;
 
 use App\Application\Services\SpotifyClientTokenFetchingService;
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\SpotifyCredentials\SpotifyAuthApi;
 use App\Infrastructure\Persistence\SpotifyCredentials\InMemoryClientCredentialsRepository;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
@@ -210,7 +210,7 @@ class TokenFetchingUseCaseTest extends TestCase
             $logger,
         );
 
+        $this->expectException(ClientException::class);
         $errorRes = $tokenFetchingService->fetch('', '', 7200);
-        $this->assertInstanceOf(ErrorResponse::class, $errorRes);
     }
 }

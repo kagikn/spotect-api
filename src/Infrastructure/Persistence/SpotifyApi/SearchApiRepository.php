@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\SpotifyApi;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\SpotifyApi\SearchRepository;
 
@@ -22,23 +21,19 @@ class SearchApiRepository implements SearchRepository
      * @param  string  $accessToken
      * @param ?string  $acceptLanguageHeader
      *
-     * @return TrackPagingObject|ErrorResponse
+     * @return TrackPagingObject
      */
     public function searchForTrack(
         array $queryParams,
         string $accessToken,
         string $acceptLanguageHeader = null
-    ): TrackPagingObject|ErrorResponse {
+    ): TrackPagingObject {
         $res = $this->client->get(
             'search',
             $accessToken,
             $queryParams,
             $acceptLanguageHeader
         );
-
-        if ($res instanceof ErrorResponse) {
-            return $res;
-        }
 
         return TrackPagingObject::fromTrackSearchResponse(
             $res['tracks']

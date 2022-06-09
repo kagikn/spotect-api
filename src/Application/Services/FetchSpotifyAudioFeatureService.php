@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Application\Services;
 
 use App\Domain\Entities\SpotifyApi\AudioFeaturesObject;
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\SpotifyApi\AudioFeatureRepository;
-use App\Domain\SpotifyCredentials\SpotifyCredentials;
+use App\Exception\SpotifyApi\BadRequestParameterException;
 use App\Infrastructure\Persistence\SpotifyApi\AudioFeatureCacheRepository;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -42,25 +41,42 @@ class FetchSpotifyAudioFeatureService
                 $_ENV['SPOTIFY_CLIENT_SECRET'],
             );
 
-            if ($credentialOrErrorRes instanceof ErrorResponse) {
-                return $credentialOrErrorRes->writeErrorResponse($response);
+            try {
+                $newAudioFeaturesObj = $this->fetchTrackAudioFeatureInternal(
+                    $trackId,
+                    $credentialOrErrorRes->getAccessToken(),
+                );
+            } catch (BadRequestParameterException) {
+                $response = $response->withStatus(400);
+                $response = $response->withHeader(
+                    'Content-Type',
+                    'application/json'
+                );
+                $arrayToWriteAsJsonBody = [
+                    'error' => [
+                        'status' => 400,
+                        'message' => 'invalid id'
+                    ]
+                ];
+                $response->getBody()->write(
+                    json_encode($arrayToWriteAsJsonBody),
+                );
+
+                return $response;
             }
 
-            $newAudioFeaturesObj = $this->fetchTrackAudioFeatureInternal(
-                $trackId,
-                $credentialOrErrorRes->getAccessToken(),
-            );
-
-            if ($newAudioFeaturesObj instanceof ErrorResponse) {
-                return $newAudioFeaturesObj->writeErrorResponse($response);
-            }
 
             $this->audioFeatureCacheRepository->store($newAudioFeaturesObj);
             $audioFeaturesObj = $newAudioFeaturesObj;
         }
-
-        $response = $response->withHeader('Content-Type', 'application/json');
-        $response->getBody()->write($audioFeaturesObj->mainValuesToJson());
+        $jsonBody = $audioFeaturesObj->mainValuesToJson();
+        $response = $response->withHeader(
+            'Content-Type',
+            'application/json'
+        );
+        $response->getBody()->write(
+            $jsonBody,
+        );
 
         return $response;
     }
@@ -69,12 +85,12 @@ class FetchSpotifyAudioFeatureService
      * @param  string  $trackId
      * @param  string  $accessToken
      *
-     * @return AudioFeaturesObject|ErrorResponse
+     * @return AudioFeaturesObject
      */
     private function fetchTrackAudioFeatureInternal(
         string $trackId,
         string $accessToken,
-    ): AudioFeaturesObject|ErrorResponse {
+    ): AudioFeaturesObject {
         return $this->audioFeatureRepository->getAudioFeature(
             $trackId,
             $accessToken

@@ -32,7 +32,7 @@ class FakeTrackRepository implements TrackRepository
         if (empty($trackId) || empty($accessToken)) {
             throw new BadRequestParameterException(
                 'tracks/' . $trackId,
-                'invalid track parameter'
+                'invalid id'
             );
         }
 

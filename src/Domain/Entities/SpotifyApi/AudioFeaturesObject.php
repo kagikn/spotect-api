@@ -84,29 +84,32 @@ class AudioFeaturesObject
         $audioFeatureArrayAssoc = json_decode(
             $itemArray,
             true,
-            512,
-            JSON_BIGINT_AS_STRING
         );
 
+        return self::fromItemArray($audioFeatureArrayAssoc);
+    }
+
+    public static function fromItemArray(array $item): AudioFeaturesObject
+    {
         return new AudioFeaturesObject(
-            $audioFeatureArrayAssoc['id'],
-            $audioFeatureArrayAssoc['acousticness'],
-            $audioFeatureArrayAssoc['analysis_url'],
-            $audioFeatureArrayAssoc['danceability'],
-            $audioFeatureArrayAssoc['duration_ms'],
-            $audioFeatureArrayAssoc['energy'],
-            $audioFeatureArrayAssoc['instrumentalness'],
-            $audioFeatureArrayAssoc['key'],
-            $audioFeatureArrayAssoc['liveness'],
-            $audioFeatureArrayAssoc['loudness'],
-            $audioFeatureArrayAssoc['mode'],
-            $audioFeatureArrayAssoc['speechiness'],
-            $audioFeatureArrayAssoc['tempo'],
-            $audioFeatureArrayAssoc['time_signature'],
-            $audioFeatureArrayAssoc['track_href'],
-            $audioFeatureArrayAssoc['type'],
-            $audioFeatureArrayAssoc['uri'],
-            $audioFeatureArrayAssoc['valence'],
+            $item['id'],
+            $item['acousticness'],
+            $item['analysis_url'],
+            $item['danceability'],
+            $item['duration_ms'],
+            $item['energy'],
+            $item['instrumentalness'],
+            $item['key'],
+            $item['liveness'],
+            $item['loudness'],
+            $item['mode'],
+            $item['speechiness'],
+            $item['tempo'],
+            $item['time_signature'],
+            $item['track_href'],
+            $item['type'],
+            $item['uri'],
+            $item['valence'],
         );
     }
 

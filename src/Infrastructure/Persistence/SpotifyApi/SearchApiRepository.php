@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\SpotifyApi;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\SpotifyApi\SearchRepository;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use GuzzleHttp\Exception\GuzzleException;
 
 class SearchApiRepository implements SearchRepository
@@ -23,14 +23,15 @@ class SearchApiRepository implements SearchRepository
      * @param  string  $accessToken
      * @param ?string  $acceptLanguageHeader
      *
-     * @return TrackPagingObject|ErrorResponse
+     * @return TrackPagingObject
+     * @throws SpotifyApiException
      * @throws GuzzleException
      */
     public function searchForTrack(
         array $queryParams,
         string $accessToken,
         string $acceptLanguageHeader = null
-    ): TrackPagingObject|ErrorResponse {
+    ): TrackPagingObject {
         $res = $this->client->get(
             'search',
             $accessToken,
@@ -38,19 +39,8 @@ class SearchApiRepository implements SearchRepository
             $acceptLanguageHeader
         );
 
-        $jsonBody = $res->getBody()->getContents();
-        $statusCode = $res->getStatusCode();
-
-        if ($statusCode != 200) {
-            $jsonArray = json_decode($jsonBody, true);
-            $error = $jsonArray['error'];
-            return new ErrorResponse($statusCode, $error['message']);
-        }
-
-        $searchResultJson = json_decode($jsonBody, true);
-
         return TrackPagingObject::fromTrackSearchResponse(
-            $searchResultJson['tracks']
+            $res['tracks']
         );
     }
 }

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Application\Services;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\Entities\SpotifyApiCustomResponse\TrackPagingObjectSimplified;
 use App\Domain\SpotifyApi\SearchRepository;
+use App\Exception\SpotifyApi\BadRequestParameterException;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use App\Infrastructure\Persistence\GeoIP\GeoIPDetectorInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -36,42 +38,32 @@ class SearchSpotifyService
         $queryParams = $request->getQueryParams();
         $acceptLanguage = $request->getHeader('Accept-Language');
 
-        $tokenOrErrorRes = $this->tokenFetchingService->fetch(
+        $token = $this->tokenFetchingService->fetch(
             $_ENV['SPOTIFY_CLIENT_ID'],
             $_ENV['SPOTIFY_CLIENT_SECRET'],
         );
 
-        if ($tokenOrErrorRes == null) {
-            return (new ErrorResponse(
-                500,
-                'internal error'
-            ))->writeErrorResponse($response);
+        try {
+            $trackPagingObj = $this->searchInternal(
+                $queryParams,
+                $token->getAccessToken(),
+                $acceptLanguage[0] ?? '',
+            );
+
+            $trackPagingObjSimplified = TrackPagingObjectSimplified::fromTrackPagingObjectFull(
+                $trackPagingObj
+            );
+            $jsonBody = $trackPagingObjSimplified->toJson();
+        } catch (BadRequestParameterException $exception) {
+            $jsonBody = $exception->getJsonStringOfErrorObject();
+            $response = $response->withStatus(400);
         }
-
-        $token = $tokenOrErrorRes;
-
-        $trackPagingObjOrError = $this->searchInternal(
-            $queryParams,
-            $token->getAccessToken(),
-            $acceptLanguage[0] ?? '',
-        );
-
-
-        if ($trackPagingObjOrError instanceof ErrorResponse) {
-            return $trackPagingObjOrError->writeErrorResponse($response);
-        }
-
-
-        $trackPagingObjSimplified = TrackPagingObjectSimplified::fromTrackPagingObjectFull(
-            $trackPagingObjOrError
-        );
-        $jsonBodyToWrite = $trackPagingObjSimplified->toJson();
 
         $response = $response->withHeader(
             'Content-Type',
             'application/json'
         );
-        $response->getBody()->write($jsonBodyToWrite);
+        $response->getBody()->write($jsonBody);
 
         return $response;
     }
@@ -81,13 +73,15 @@ class SearchSpotifyService
      * @param  string  $token
      * @param ?string  $acceptLanguage
      *
-     * @return TrackPagingObject|ErrorResponse
+     * @return TrackPagingObject
+     * @throws SpotifyApiException
+     * @throws GuzzleException
      */
     private function searchInternal(
         array $queries,
         string $token,
         ?string $acceptLanguage = null,
-    ): TrackPagingObject|ErrorResponse {
+    ): TrackPagingObject {
         if (!isset($queries['market'])) {
             $queries['market'] = $this->iPDetector->detectCountry('JP');
         }

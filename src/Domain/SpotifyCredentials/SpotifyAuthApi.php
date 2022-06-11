@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\SpotifyCredentials;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 
 class SpotifyAuthApi implements ISpotifyAuthApi
@@ -21,23 +21,17 @@ class SpotifyAuthApi implements ISpotifyAuthApi
     }
 
     /**
-     * @return SpotifyGenericCredentials|ErrorResponse
+     * @param  string  $clientId
+     * @param  string  $clientSecret
+     *
+     * @return SpotifyGenericCredentials
      */
     public function getTokenClientCredentials(
         string $clientId,
         string $clientSecret
-    ): SpotifyGenericCredentials|ErrorResponse {
+    ): SpotifyGenericCredentials {
         $res = $this->tryFetchToken($clientId, $clientSecret);
-
         $json = json_decode($res->getBody()->getContents(), true);
-
-        if ($res->getStatusCode() != 200) {
-            $error = $json['error'];
-            $errorMsg = is_string($error) ? $error : 'server_error';
-
-            return new ErrorResponse(500, $errorMsg);
-        }
-
         return new SpotifyGenericCredentials(
             $json['access_token'],
             $json['expires_in'] + time()
@@ -47,20 +41,15 @@ class SpotifyAuthApi implements ISpotifyAuthApi
     private function tryFetchToken(
         string $clientId,
         string $clientSecret
-    ): ?ResponseInterface {
+    ): ResponseInterface {
         $authStr = 'Basic ' . base64_encode($clientId . ':' . $clientSecret);
-        try {
-            return $this->guzzleClient->post('', [
-                'headers' => [
-                    'Authorization' => $authStr
-                ],
-                'form_params' => [
-                    'grant_type' => 'client_credentials'
-                ],
-                'http_errors' => false,
-            ]);
-        } catch (\GuzzleHttp\Exception\GuzzleException $ex) {
-            return null;
-        }
+        return $this->guzzleClient->post('', [
+            'headers' => [
+                'Authorization' => $authStr
+            ],
+            'form_params' => [
+                'grant_type' => 'client_credentials'
+            ],
+        ]);
     }
 }

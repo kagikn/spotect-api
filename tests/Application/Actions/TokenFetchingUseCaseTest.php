@@ -8,6 +8,7 @@ use App\Application\Services\SpotifyClientTokenFetchingService;
 use App\Domain\SpotifyCredentials\SpotifyAuthApi;
 use App\Infrastructure\Persistence\SpotifyCredentials\InMemoryClientCredentialsRepository;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
@@ -209,7 +210,7 @@ class TokenFetchingUseCaseTest extends TestCase
             $logger,
         );
 
-        $nullRes = $tokenFetchingService->fetch('', '', 7200);
-        $this->assertNull($nullRes);
+        $this->expectException(ClientException::class);
+        $errorRes = $tokenFetchingService->fetch('', '', 7200);
     }
 }

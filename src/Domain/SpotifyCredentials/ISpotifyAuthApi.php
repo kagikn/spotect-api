@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\SpotifyCredentials;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
+use GuzzleHttp\Exception\GuzzleException;
 
 interface ISpotifyAuthApi
 {
@@ -12,10 +12,11 @@ interface ISpotifyAuthApi
      * @param  string  $clientId
      * @param  string  $clientSecret
      *
-     * @return SpotifyCredentials|ErrorResponse
+     * @return SpotifyCredentials
+     * @throws GuzzleException
      */
     public function getTokenClientCredentials(
         string $clientId,
         string $clientSecret
-    ): SpotifyCredentials|ErrorResponse;
+    ): SpotifyCredentials;
 }

@@ -10,6 +10,9 @@ class ArtistObjectMinimum
     ) {
     }
 
+    /**
+     * @return array
+     */
     public function toAssociativeArray()
     {
         return [

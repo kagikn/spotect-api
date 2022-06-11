@@ -18,6 +18,8 @@ class InMemoryClientCredentialsRepository implements
     }
 
     /**
+     * @param  SpotifyCredentials  $credentials
+     *
      * @return bool
      */
     public function store(SpotifyCredentials $credentials): bool

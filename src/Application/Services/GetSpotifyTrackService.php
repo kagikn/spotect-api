@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Application\Services;
 
-use App\Domain\Entities\SpotifyApi\ErrorResponse;
+use App\Exception\SpotifyApi\BadRequestParameterException;
 use App\Domain\Entities\SpotifyApi\TrackObjectFullEntity;
 use App\Domain\Entities\SpotifyApiCustomResponse\TrackObjectSimplifiedCustom;
 use App\Domain\SpotifyApi\TrackRepository;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use App\Infrastructure\Persistence\GeoIP\GeoIPDetectorInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -41,33 +43,38 @@ class GetSpotifyTrackService
             $_ENV['SPOTIFY_CLIENT_SECRET'],
         );
 
-        if ($tokenOrErrorRes == null) {
-            return (new ErrorResponse(
-                500,
-                'internal error'
-            ))->writeErrorResponse($response);
-        }
-
         $token = $tokenOrErrorRes;
 
-        $trackPagingObj = $this->getTrackInternal(
-            $trackId,
-            $token->getAccessToken(),
-            $acceptLanguage[0] ?? null,
-        );
-
-        if ($trackPagingObj instanceof ErrorResponse) {
-            return $trackPagingObj->writeErrorResponse($response);
+        try {
+            $trackPagingObj = $this->getSimplifiedTrackObject(
+                $trackId,
+                $token->getAccessToken(),
+                $acceptLanguage[0] ?? null,
+            );
+            $jsonBody = $trackPagingObj->toJson();
+        } catch (BadRequestParameterException $exception) {
+            $jsonBody = $exception->getJsonStringOfErrorObject();
+            $response = $response->withStatus(400);
         }
 
-        $jsonBodyToWrite = TrackObjectSimplifiedCustom::fromTrackObjectFull(
-            $trackPagingObj
-        )->toJson();
-
         $response = $response->withHeader('Content-Type', 'application/json');
-        $response->getBody()->write($jsonBodyToWrite);
-
+        $response->getBody()->write($jsonBody);
         return $response;
+    }
+
+    private function getSimplifiedTrackObject(
+        string $trackId,
+        string $accessToken,
+        ?string $acceptLanguage,
+    ): TrackObjectSimplifiedCustom {
+        $trackPagingObj = $this->getTrackInternal(
+            $trackId,
+            $accessToken,
+            $acceptLanguage[0] ?? null,
+        );
+        return TrackObjectSimplifiedCustom::fromTrackObjectFull(
+            $trackPagingObj
+        );
     }
 
     /**
@@ -75,13 +82,15 @@ class GetSpotifyTrackService
      * @param  string  $token
      * @param ?string  $acceptLanguage
      *
-     * @return TrackObjectFullEntity|ErrorResponse
+     * @return TrackObjectFullEntity
+     * @throws SpotifyApiException
+     * @throws GuzzleException
      */
     private function getTrackInternal(
         string $trackId,
         string $token,
         ?string $acceptLanguage = null,
-    ): TrackObjectFullEntity|ErrorResponse {
+    ): TrackObjectFullEntity {
         $isoCode = $this->iPDetector->detectCountry('JP');
 
         return $this->trackRepository->getTrackInfo(

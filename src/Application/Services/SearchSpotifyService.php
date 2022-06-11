@@ -7,6 +7,7 @@ namespace App\Application\Services;
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\Entities\SpotifyApiCustomResponse\TrackPagingObjectSimplified;
 use App\Domain\SpotifyApi\SearchRepository;
+use App\Exception\SpotifyApi\BadRequestParameterException;
 use App\Infrastructure\Persistence\GeoIP\GeoIPDetectorInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -35,29 +36,32 @@ class SearchSpotifyService
         $queryParams = $request->getQueryParams();
         $acceptLanguage = $request->getHeader('Accept-Language');
 
-        $tokenOrErrorRes = $this->tokenFetchingService->fetch(
+        $token = $this->tokenFetchingService->fetch(
             $_ENV['SPOTIFY_CLIENT_ID'],
             $_ENV['SPOTIFY_CLIENT_SECRET'],
         );
 
-        $token = $tokenOrErrorRes;
+        try {
+            $trackPagingObj = $this->searchInternal(
+                $queryParams,
+                $token->getAccessToken(),
+                $acceptLanguage[0] ?? '',
+            );
 
-        $trackPagingObjOrError = $this->searchInternal(
-            $queryParams,
-            $token->getAccessToken(),
-            $acceptLanguage[0] ?? '',
-        );
-
-        $trackPagingObjSimplified = TrackPagingObjectSimplified::fromTrackPagingObjectFull(
-            $trackPagingObjOrError
-        );
-        $jsonBodyToWrite = $trackPagingObjSimplified->toJson();
+            $trackPagingObjSimplified = TrackPagingObjectSimplified::fromTrackPagingObjectFull(
+                $trackPagingObj
+            );
+            $jsonBody = $trackPagingObjSimplified->toJson();
+        } catch (BadRequestParameterException $exception) {
+            $jsonBody = $exception->getJsonStringOfErrorObject();
+            $response = $response->withStatus(400);
+        }
 
         $response = $response->withHeader(
             'Content-Type',
             'application/json'
         );
-        $response->getBody()->write($jsonBodyToWrite);
+        $response->getBody()->write($jsonBody);
 
         return $response;
     }

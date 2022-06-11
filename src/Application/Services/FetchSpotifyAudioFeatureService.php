@@ -65,7 +65,6 @@ class FetchSpotifyAudioFeatureService
                 return $response;
             }
 
-
             $this->audioFeatureCacheRepository->store($newAudioFeaturesObj);
             $audioFeaturesObj = $newAudioFeaturesObj;
         }

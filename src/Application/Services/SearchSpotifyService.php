@@ -8,7 +8,9 @@ use App\Domain\Entities\SpotifyApi\TrackPagingObject;
 use App\Domain\Entities\SpotifyApiCustomResponse\TrackPagingObjectSimplified;
 use App\Domain\SpotifyApi\SearchRepository;
 use App\Exception\SpotifyApi\BadRequestParameterException;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use App\Infrastructure\Persistence\GeoIP\GeoIPDetectorInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -72,6 +74,8 @@ class SearchSpotifyService
      * @param ?string  $acceptLanguage
      *
      * @return TrackPagingObject
+     * @throws SpotifyApiException
+     * @throws GuzzleException
      */
     private function searchInternal(
         array $queries,

@@ -7,7 +7,9 @@ namespace App\Application\Services;
 use App\Domain\Entities\SpotifyApi\AudioFeaturesObject;
 use App\Domain\SpotifyApi\AudioFeatureRepository;
 use App\Exception\SpotifyApi\BadRequestParameterException;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use App\Infrastructure\Persistence\SpotifyApi\AudioFeatureCacheRepository;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -85,6 +87,8 @@ class FetchSpotifyAudioFeatureService
      * @param  string  $accessToken
      *
      * @return AudioFeaturesObject
+     * @throws SpotifyApiException
+     * @throws GuzzleException
      */
     private function fetchTrackAudioFeatureInternal(
         string $trackId,

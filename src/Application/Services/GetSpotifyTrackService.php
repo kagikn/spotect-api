@@ -8,7 +8,9 @@ use App\Exception\SpotifyApi\BadRequestParameterException;
 use App\Domain\Entities\SpotifyApi\TrackObjectFullEntity;
 use App\Domain\Entities\SpotifyApiCustomResponse\TrackObjectSimplifiedCustom;
 use App\Domain\SpotifyApi\TrackRepository;
+use App\Exception\SpotifyApi\SpotifyApiException;
 use App\Infrastructure\Persistence\GeoIP\GeoIPDetectorInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -81,6 +83,8 @@ class GetSpotifyTrackService
      * @param ?string  $acceptLanguage
      *
      * @return TrackObjectFullEntity
+     * @throws SpotifyApiException
+     * @throws GuzzleException
      */
     private function getTrackInternal(
         string $trackId,

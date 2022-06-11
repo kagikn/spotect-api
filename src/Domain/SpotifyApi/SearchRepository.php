@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\SpotifyApi;
 
 use App\Domain\Entities\SpotifyApi\TrackPagingObject;
+use App\Exception\SpotifyApi\SpotifyApiException;
+use GuzzleHttp\Exception\GuzzleException;
 
 interface SearchRepository
 {
@@ -14,6 +16,8 @@ interface SearchRepository
      * @param ?string  $acceptLanguageHeader
      *
      * @return TrackPagingObject
+     * @throws SpotifyApiException
+     * @throws GuzzleException
      */
     public function searchForTrack(
         array $queryParams,

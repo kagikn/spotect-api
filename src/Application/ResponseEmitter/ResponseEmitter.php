@@ -19,14 +19,21 @@ class ResponseEmitter extends SlimResponseEmitter
 
         $response = $response
             ->withHeader('Access-Control-Allow-Credentials', 'true')
-            ->withHeader('Access-Control-Allow-Origin', $origin)
+            ->withHeader(
+                'Access-Control-Allow-Origin',
+                $_SERVER['ALLOWED_ORIGIN']
+            )
             ->withHeader(
                 'Access-Control-Allow-Headers',
                 'X-Requested-With, Content-Type, Accept, Origin, Authorization',
             )
             ->withHeader(
                 'Access-Control-Allow-Methods',
-                'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+                $_SERVER['ALLOWED_REQUEST_METHODS']
+            )
+            ->withHeader(
+                'Access-Control-Max-Age',
+                $_SERVER['ACCESS_CONTROL_MAX_AGE']
             )
             ->withHeader(
                 'Cache-Control',

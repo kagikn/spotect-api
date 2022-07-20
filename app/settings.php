@@ -12,15 +12,16 @@ return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
         SettingsInterface::class => function () {
             return new Settings([
-                'displayErrorDetails' => true,
+                'displayErrorDetails' => $_ENV['APP_DEBUG'],
                 // Should be set to false in production
-                'logError' => true,
-                'logErrorDetails' => true,
+                'logError' => $_ENV['APP_DEBUG'],
+                'logErrorDetails' => $_ENV['APP_DEBUG'],
                 'logger' => [
                     'name' => 'slim-app',
                     'path' => isset($_ENV['docker']) ? 'php://stdout'
                         : __DIR__ . '/../logs/app.log',
-                    'level' => Logger::DEBUG,
+                    'level' => $_ENV['APP_DEBUG'] ? Logger::DEBUG
+                        : Logger::WARNING,
                 ],
                 'GeoIp' => [
                     'filepath' => __DIR__ . '/../resource/GeoLite2-Country.mmdb'

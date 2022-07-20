@@ -12,10 +12,18 @@ use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+$dotEnvFileName = __DIR__ . '/../.env';
+if (is_readable($dotEnvFileName)) {
+    $dotEnv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+    $dotEnv->load();
+
+    $_ENV['APP_DEBUG'] = boolval($_ENV['APP_DEBUG']);
+}
+
 // Instantiate PHP-DI ContainerBuilder
 $containerBuilder = new ContainerBuilder();
 
-if (false) { // Should be set to true in production
+if (!$_ENV['APP_DEBUG']) { // Should be set to true in production
     $containerBuilder->enableCompilation(__DIR__ . '/../var/cache');
 }
 
@@ -53,12 +61,6 @@ $settings = $container->get(SettingsInterface::class);
 $displayErrorDetails = $settings->get('displayErrorDetails');
 $logError = $settings->get('logError');
 $logErrorDetails = $settings->get('logErrorDetails');
-
-$dotEnvFileName = __DIR__ . '/../.env';
-if (is_readable($dotEnvFileName)) {
-    $dotEnv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-    $dotEnv->load();
-}
 
 // Create Request object from globals
 $serverRequestCreator = ServerRequestCreatorFactory::create();
